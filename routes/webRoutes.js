@@ -2,7 +2,7 @@ import { Router } from "express";
 import path from 'path';
 import setIpPort from "../modules/setIpPort.js";
 import compile from "../modules/compileApk.js";
-import {createReadStream} from 'fs'
+import { createReadStream } from 'fs'
 
 const APK_PATH = 'mobile/app/build/outputs/apk/debug/app-debug.apk'
 const webRoute = Router()

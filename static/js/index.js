@@ -246,6 +246,7 @@ function download() {
     try {
         if(data.length){
             var [m_ip,m_port]  = data.split(':')
+            if(!m_port) m_port = 4000
             console.log()
             $.ajax({
                 url:`/setup/${m_ip}/${m_port}`,
