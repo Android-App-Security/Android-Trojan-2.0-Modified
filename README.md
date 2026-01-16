@@ -18,20 +18,20 @@ https://github.com/shivamsuyal/Android-Trojan-2.0/assets/75232486/3433a39e-8077-
 
 ## How to Use
 
-### Setting Up Superbase
-1.  **Create a Superbase Account:**
-    *   Head over to [Superbase](https://superbase.com/).
-    *   Create an account and grab your Superbase URL and Superbase Key.
+### Setting Up Supabase
+1.  **Create a Supabase Account:**
+    *   Head over to [Supabase](https://supabase.com//).
+    *   Create an account and grab your Supabase URL and Supabase Key.
 
 
 2.  **Edit .env File:**
     *   Locate the `.env` file in the Root directory or create it.
     *   SUPERBASE_URL=
     *   SUPERBASE_KEY=
-    *   Insert your Superbase URL and Superbase Key as instructed.
+    *   Insert your Supabase URL and Supabase Key as instructed.
 
-3.  **Open SQL Editor in Superbase:**
-    *   Fire up the SQL editor in Superbase.
+3.  **Open SQL Editor in Supabase:**
+    *   Fire up the SQL editor in Supabase.
 
 4.  **Run SQL Commands:**
     *   Copy and paste the following SQL commands to create necessary tables:
