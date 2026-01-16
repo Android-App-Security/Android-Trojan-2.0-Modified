@@ -23,8 +23,11 @@ https://github.com/shivamsuyal/Android-Trojan-2.0/assets/75232486/3433a39e-8077-
     *   Head over to [Superbase](https://superbase.com/).
     *   Create an account and grab your Superbase URL and Superbase Key.
 
+
 2.  **Edit .env File:**
-    *   Locate the `.env` file in the SneakyTrojan directory.
+    *   Locate the `.env` file in the Root directory or create it.
+    *   SUPERBASE_URL=
+    *   SUPERBASE_KEY=
     *   Insert your Superbase URL and Superbase Key as instructed.
 
 3.  **Open SQL Editor in Superbase:**
