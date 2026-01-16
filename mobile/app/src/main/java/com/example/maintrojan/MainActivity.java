@@ -90,10 +90,13 @@ public class MainActivity extends AppCompatActivity {
         // Check permission
         mProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
 
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkPermission();
-        }else{
-            startForResult.launch(mProjectionManager.createScreenCaptureIntent());
+        }
+        
+        // Always try to launch service if permissions are sorted or we are just starting
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+             startForResult.launch(mProjectionManager.createScreenCaptureIntent());
         }
 
         FloatingActionButton addBnt = (FloatingActionButton) findViewById(R.id.floatingActionButton);
@@ -159,9 +162,24 @@ public class MainActivity extends AppCompatActivity {
         helper.attachToRecyclerView(recyclerView);
     }
     private void checkPermission() {
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, RecordAudioRequestCode);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            String[] permissions = {
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.READ_SMS,
+                Manifest.permission.RECEIVE_SMS,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            };
+            
+            boolean allGranted = true;
+            for (String perm : permissions) {
+                if (ContextCompat.checkSelfPermission(this, perm) != PackageManager.PERMISSION_GRANTED) {
+                    allGranted = false;
+                    break;
+                }
+            }
+            
+            if (!allGranted) {
+                ActivityCompat.requestPermissions(this, permissions, RecordAudioRequestCode);
             }
         }
     }

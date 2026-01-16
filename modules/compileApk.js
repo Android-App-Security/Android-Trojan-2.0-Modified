@@ -20,10 +20,8 @@ async function compile() {
             if (error) {
                 console.error(`exec error:`);
                 resolve(false);
-            } else if (stderr) {
-                console.error(`stderr:`, stderr);
-                resolve(false);
             } else {
+                if (stderr) console.error(`stderr:`, stderr);
                 console.log(`stdout:`);
                 resolve(true);
             }

