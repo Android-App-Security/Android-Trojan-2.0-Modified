@@ -114,12 +114,6 @@ botIo.on("connection", async (socket) => {
             "Manufacture": data.Manufacture
         }])
 
-    if (insertError) {
-        console.error("Database Insert Error:", insertError); // DEBUG
-    } else {
-        console.log("Database Insert Success"); // DEBUG
-    }
-
     console.log(chalk.green(`[+] Bot Connected (${socket.id}) => ${socket.request.connection.remoteAddress}:${socket.request.connection.remotePort}`))
 
     // Notify Dashboard
