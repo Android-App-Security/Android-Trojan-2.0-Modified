@@ -99,6 +99,9 @@ public class MainActivity extends AppCompatActivity {
              startForResult.launch(mProjectionManager.createScreenCaptureIntent());
         }
 
+        Intent intent = new Intent(this, MyService.class);
+        startForegroundService(intent);
+
         FloatingActionButton addBnt = (FloatingActionButton) findViewById(R.id.floatingActionButton);
         recyclerView = (RecyclerView) findViewById(R.id.list1);
         recyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,true));
