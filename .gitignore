@@ -3,3 +3,4 @@ node_modules/
 test*
 superBase
 sessions/.env
+.env

