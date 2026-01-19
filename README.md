@@ -420,8 +420,8 @@ By using this software, you agree to use it responsibly and in compliance with a
 
 ## 👨‍💻 Author
 
-**Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
+**Ko-kn3t**
+- GitHub: [@Ko-kn3t](https://github.com/Ko-kn3t)
 
 ---
 
