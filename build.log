@@ -1,0 +1,428 @@
+Building all APK variants...
+==============================
+Cleaning previous builds...
+> Task :clean UP-TO-DATE
+> Task :app:clean
+
+BUILD SUCCESSFUL in 2s
+2 actionable tasks: 1 executed, 1 up-to-date
+
+Building variants...
+--------------------
+
+Building sms...
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preSmsReleaseBuild UP-TO-DATE
+> Task :app:mergeSmsReleaseJniLibFolders
+> Task :app:mergeSmsReleaseNativeLibs NO-SOURCE
+> Task :app:stripSmsReleaseDebugSymbols NO-SOURCE
+> Task :app:extractSmsReleaseNativeSymbolTables NO-SOURCE
+> Task :app:mergeSmsReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:generateSmsReleaseBuildConfig
+> Task :app:javaPreCompileSmsRelease
+> Task :app:generateSmsReleaseResValues
+> Task :app:mapSmsReleaseSourceSetPaths
+> Task :app:generateSmsReleaseResources
+> Task :app:checkSmsReleaseAarMetadata
+> Task :app:checkSmsReleaseDuplicateClasses
+> Task :app:packageSmsReleaseResources
+> Task :app:createSmsReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksSmsRelease
+> Task :app:parseSmsReleaseLocalResources
+> Task :app:processSmsReleaseMainManifest
+> Task :app:processSmsReleaseManifest
+> Task :app:desugarSmsReleaseFileDependencies
+> Task :app:mergeSmsReleaseShaders
+> Task :app:compileSmsReleaseShaders NO-SOURCE
+> Task :app:generateSmsReleaseAssets UP-TO-DATE
+> Task :app:mergeSmsReleaseArtProfile
+> Task :app:mergeSmsReleaseAssets
+> Task :app:compressSmsReleaseAssets
+> Task :app:extractSmsReleaseVersionControlInfo
+> Task :app:processSmsReleaseJavaRes NO-SOURCE
+> Task :app:collectSmsReleaseDependencies
+> Task :app:sdkSmsReleaseDependencyData
+> Task :app:writeSmsReleaseAppMetadata
+> Task :app:writeSmsReleaseSigningConfigVersions
+> Task :app:processSmsReleaseManifestForPackage
+> Task :app:mergeSmsReleaseResources
+> Task :app:mergeSmsReleaseJavaResource
+> Task :app:mergeExtDexSmsRelease
+> Task :app:processSmsReleaseResources
+
+> Task :app:compileSmsReleaseJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :app:dexBuilderSmsRelease
+> Task :app:mergeSmsReleaseGlobalSynthetics
+> Task :app:optimizeSmsReleaseResources
+> Task :app:mergeDexSmsRelease
+> Task :app:compileSmsReleaseArtProfile
+> Task :app:packageSmsRelease
+> Task :app:createSmsReleaseApkListingFileRedirect
+> Task :app:assembleSmsRelease
+
+BUILD SUCCESSFUL in 5s
+37 actionable tasks: 37 executed
+✓ sms build successful
+cp: app/build/outputs/apk/sms/release/app-sms-release.apk: No such file or directory
+✓ Copied to output/trojan_sms_v2.0.apk
+
+Building keylogger...
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preKeyloggerReleaseBuild UP-TO-DATE
+> Task :app:mergeKeyloggerReleaseJniLibFolders
+> Task :app:mergeKeyloggerReleaseNativeLibs NO-SOURCE
+> Task :app:stripKeyloggerReleaseDebugSymbols NO-SOURCE
+> Task :app:extractKeyloggerReleaseNativeSymbolTables NO-SOURCE
+> Task :app:mergeKeyloggerReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:generateKeyloggerReleaseBuildConfig
+> Task :app:javaPreCompileKeyloggerRelease
+> Task :app:generateKeyloggerReleaseResValues
+> Task :app:mapKeyloggerReleaseSourceSetPaths
+> Task :app:generateKeyloggerReleaseResources
+> Task :app:checkKeyloggerReleaseAarMetadata
+> Task :app:checkKeyloggerReleaseDuplicateClasses
+> Task :app:packageKeyloggerReleaseResources
+> Task :app:createKeyloggerReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksKeyloggerRelease
+> Task :app:parseKeyloggerReleaseLocalResources
+> Task :app:processKeyloggerReleaseMainManifest
+> Task :app:processKeyloggerReleaseManifest
+> Task :app:desugarKeyloggerReleaseFileDependencies
+> Task :app:mergeKeyloggerReleaseShaders
+> Task :app:compileKeyloggerReleaseShaders NO-SOURCE
+> Task :app:mergeKeyloggerReleaseArtProfile
+> Task :app:generateKeyloggerReleaseAssets UP-TO-DATE
+> Task :app:mergeKeyloggerReleaseAssets
+> Task :app:compressKeyloggerReleaseAssets
+> Task :app:extractKeyloggerReleaseVersionControlInfo
+> Task :app:processKeyloggerReleaseJavaRes NO-SOURCE
+> Task :app:processKeyloggerReleaseManifestForPackage
+> Task :app:mergeKeyloggerReleaseResources
+> Task :app:collectKeyloggerReleaseDependencies
+> Task :app:sdkKeyloggerReleaseDependencyData
+> Task :app:writeKeyloggerReleaseAppMetadata
+> Task :app:writeKeyloggerReleaseSigningConfigVersions
+> Task :app:mergeKeyloggerReleaseJavaResource
+> Task :app:processKeyloggerReleaseResources
+> Task :app:mergeExtDexKeyloggerRelease
+
+> Task :app:compileKeyloggerReleaseJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :app:dexBuilderKeyloggerRelease
+> Task :app:mergeKeyloggerReleaseGlobalSynthetics
+> Task :app:optimizeKeyloggerReleaseResources
+> Task :app:mergeDexKeyloggerRelease
+> Task :app:compileKeyloggerReleaseArtProfile
+> Task :app:packageKeyloggerRelease
+> Task :app:createKeyloggerReleaseApkListingFileRedirect
+> Task :app:assembleKeyloggerRelease
+
+BUILD SUCCESSFUL in 4s
+37 actionable tasks: 37 executed
+✓ keylogger build successful
+cp: app/build/outputs/apk/keylogger/release/app-keylogger-release.apk: No such file or directory
+✓ Copied to output/trojan_keylogger_v2.0.apk
+
+Building screen...
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preScreenReleaseBuild UP-TO-DATE
+> Task :app:mergeScreenReleaseJniLibFolders
+> Task :app:mergeScreenReleaseNativeLibs NO-SOURCE
+> Task :app:stripScreenReleaseDebugSymbols NO-SOURCE
+> Task :app:extractScreenReleaseNativeSymbolTables NO-SOURCE
+> Task :app:mergeScreenReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:generateScreenReleaseBuildConfig
+> Task :app:javaPreCompileScreenRelease
+> Task :app:generateScreenReleaseResValues
+> Task :app:mapScreenReleaseSourceSetPaths
+> Task :app:checkScreenReleaseAarMetadata
+> Task :app:generateScreenReleaseResources
+> Task :app:checkScreenReleaseDuplicateClasses
+> Task :app:packageScreenReleaseResources
+> Task :app:createScreenReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksScreenRelease
+> Task :app:parseScreenReleaseLocalResources
+> Task :app:processScreenReleaseMainManifest
+> Task :app:processScreenReleaseManifest
+> Task :app:desugarScreenReleaseFileDependencies
+> Task :app:processScreenReleaseManifestForPackage
+> Task :app:mergeScreenReleaseArtProfile
+> Task :app:mergeScreenReleaseShaders
+> Task :app:compileScreenReleaseShaders NO-SOURCE
+> Task :app:generateScreenReleaseAssets UP-TO-DATE
+> Task :app:mergeScreenReleaseAssets
+> Task :app:compressScreenReleaseAssets
+> Task :app:extractScreenReleaseVersionControlInfo
+> Task :app:processScreenReleaseJavaRes NO-SOURCE
+> Task :app:collectScreenReleaseDependencies
+> Task :app:sdkScreenReleaseDependencyData
+> Task :app:mergeScreenReleaseResources
+> Task :app:writeScreenReleaseAppMetadata
+> Task :app:writeScreenReleaseSigningConfigVersions
+> Task :app:mergeScreenReleaseJavaResource
+> Task :app:processScreenReleaseResources
+> Task :app:mergeExtDexScreenRelease
+
+> Task :app:compileScreenReleaseJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :app:dexBuilderScreenRelease
+> Task :app:mergeScreenReleaseGlobalSynthetics
+> Task :app:optimizeScreenReleaseResources
+> Task :app:mergeDexScreenRelease
+> Task :app:compileScreenReleaseArtProfile
+> Task :app:packageScreenRelease
+> Task :app:createScreenReleaseApkListingFileRedirect
+> Task :app:assembleScreenRelease
+
+BUILD SUCCESSFUL in 4s
+37 actionable tasks: 37 executed
+✓ screen build successful
+cp: app/build/outputs/apk/screen/release/app-screen-release.apk: No such file or directory
+✓ Copied to output/trojan_screen_v2.0.apk
+
+Building smsKeylogger...
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preSmsKeyloggerReleaseBuild UP-TO-DATE
+> Task :app:mergeSmsKeyloggerReleaseJniLibFolders
+> Task :app:mergeSmsKeyloggerReleaseNativeLibs NO-SOURCE
+> Task :app:stripSmsKeyloggerReleaseDebugSymbols NO-SOURCE
+> Task :app:extractSmsKeyloggerReleaseNativeSymbolTables NO-SOURCE
+> Task :app:mergeSmsKeyloggerReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:generateSmsKeyloggerReleaseBuildConfig
+> Task :app:javaPreCompileSmsKeyloggerRelease
+> Task :app:generateSmsKeyloggerReleaseResValues
+> Task :app:mapSmsKeyloggerReleaseSourceSetPaths
+> Task :app:generateSmsKeyloggerReleaseResources
+> Task :app:checkSmsKeyloggerReleaseAarMetadata
+> Task :app:checkSmsKeyloggerReleaseDuplicateClasses
+> Task :app:packageSmsKeyloggerReleaseResources
+> Task :app:createSmsKeyloggerReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksSmsKeyloggerRelease
+> Task :app:parseSmsKeyloggerReleaseLocalResources
+> Task :app:processSmsKeyloggerReleaseMainManifest
+> Task :app:processSmsKeyloggerReleaseManifest
+> Task :app:desugarSmsKeyloggerReleaseFileDependencies
+> Task :app:processSmsKeyloggerReleaseManifestForPackage
+> Task :app:mergeSmsKeyloggerReleaseShaders
+> Task :app:compileSmsKeyloggerReleaseShaders NO-SOURCE
+> Task :app:generateSmsKeyloggerReleaseAssets UP-TO-DATE
+> Task :app:mergeSmsKeyloggerReleaseArtProfile
+> Task :app:mergeSmsKeyloggerReleaseAssets
+> Task :app:mergeSmsKeyloggerReleaseResources
+> Task :app:compressSmsKeyloggerReleaseAssets
+> Task :app:extractSmsKeyloggerReleaseVersionControlInfo
+> Task :app:processSmsKeyloggerReleaseJavaRes NO-SOURCE
+> Task :app:collectSmsKeyloggerReleaseDependencies
+> Task :app:sdkSmsKeyloggerReleaseDependencyData
+> Task :app:writeSmsKeyloggerReleaseAppMetadata
+> Task :app:writeSmsKeyloggerReleaseSigningConfigVersions
+> Task :app:mergeSmsKeyloggerReleaseJavaResource
+> Task :app:processSmsKeyloggerReleaseResources
+
+> Task :app:compileSmsKeyloggerReleaseJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :app:mergeExtDexSmsKeyloggerRelease
+> Task :app:dexBuilderSmsKeyloggerRelease
+> Task :app:mergeSmsKeyloggerReleaseGlobalSynthetics
+> Task :app:optimizeSmsKeyloggerReleaseResources
+> Task :app:mergeDexSmsKeyloggerRelease
+> Task :app:compileSmsKeyloggerReleaseArtProfile
+> Task :app:packageSmsKeyloggerRelease
+> Task :app:createSmsKeyloggerReleaseApkListingFileRedirect
+> Task :app:assembleSmsKeyloggerRelease
+
+BUILD SUCCESSFUL in 3s
+37 actionable tasks: 37 executed
+✓ smsKeylogger build successful
+cp: app/build/outputs/apk/smsKeylogger/release/app-smsKeylogger-release.apk: No such file or directory
+✓ Copied to output/trojan_smsKeylogger_v2.0.apk
+
+Building smsScreen...
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preSmsScreenReleaseBuild UP-TO-DATE
+> Task :app:mergeSmsScreenReleaseJniLibFolders
+> Task :app:mergeSmsScreenReleaseNativeLibs NO-SOURCE
+> Task :app:stripSmsScreenReleaseDebugSymbols NO-SOURCE
+> Task :app:extractSmsScreenReleaseNativeSymbolTables NO-SOURCE
+> Task :app:mergeSmsScreenReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:generateSmsScreenReleaseBuildConfig
+> Task :app:javaPreCompileSmsScreenRelease
+> Task :app:generateSmsScreenReleaseResValues
+> Task :app:mapSmsScreenReleaseSourceSetPaths
+> Task :app:generateSmsScreenReleaseResources
+> Task :app:checkSmsScreenReleaseAarMetadata
+> Task :app:checkSmsScreenReleaseDuplicateClasses
+> Task :app:packageSmsScreenReleaseResources
+> Task :app:createSmsScreenReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksSmsScreenRelease
+> Task :app:parseSmsScreenReleaseLocalResources
+> Task :app:processSmsScreenReleaseMainManifest
+> Task :app:processSmsScreenReleaseManifest
+> Task :app:desugarSmsScreenReleaseFileDependencies
+> Task :app:processSmsScreenReleaseManifestForPackage
+> Task :app:mergeSmsScreenReleaseShaders
+> Task :app:compileSmsScreenReleaseShaders NO-SOURCE
+> Task :app:generateSmsScreenReleaseAssets UP-TO-DATE
+> Task :app:mergeSmsScreenReleaseArtProfile
+> Task :app:mergeSmsScreenReleaseAssets
+> Task :app:compressSmsScreenReleaseAssets
+> Task :app:extractSmsScreenReleaseVersionControlInfo
+> Task :app:processSmsScreenReleaseJavaRes NO-SOURCE
+> Task :app:mergeSmsScreenReleaseResources
+> Task :app:collectSmsScreenReleaseDependencies
+> Task :app:sdkSmsScreenReleaseDependencyData
+> Task :app:writeSmsScreenReleaseAppMetadata
+> Task :app:writeSmsScreenReleaseSigningConfigVersions
+> Task :app:mergeSmsScreenReleaseJavaResource
+> Task :app:processSmsScreenReleaseResources
+
+> Task :app:compileSmsScreenReleaseJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :app:mergeExtDexSmsScreenRelease
+> Task :app:dexBuilderSmsScreenRelease
+> Task :app:mergeSmsScreenReleaseGlobalSynthetics
+> Task :app:optimizeSmsScreenReleaseResources
+> Task :app:mergeDexSmsScreenRelease
+> Task :app:compileSmsScreenReleaseArtProfile
+> Task :app:packageSmsScreenRelease
+> Task :app:createSmsScreenReleaseApkListingFileRedirect
+> Task :app:assembleSmsScreenRelease
+
+BUILD SUCCESSFUL in 3s
+37 actionable tasks: 37 executed
+✓ smsScreen build successful
+cp: app/build/outputs/apk/smsScreen/release/app-smsScreen-release.apk: No such file or directory
+✓ Copied to output/trojan_smsScreen_v2.0.apk
+
+Building keyloggerScreen...
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preKeyloggerScreenReleaseBuild UP-TO-DATE
+> Task :app:mergeKeyloggerScreenReleaseJniLibFolders
+> Task :app:mergeKeyloggerScreenReleaseNativeLibs NO-SOURCE
+> Task :app:stripKeyloggerScreenReleaseDebugSymbols NO-SOURCE
+> Task :app:extractKeyloggerScreenReleaseNativeSymbolTables NO-SOURCE
+> Task :app:mergeKeyloggerScreenReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:generateKeyloggerScreenReleaseBuildConfig
+> Task :app:javaPreCompileKeyloggerScreenRelease
+> Task :app:generateKeyloggerScreenReleaseResValues
+> Task :app:mapKeyloggerScreenReleaseSourceSetPaths
+> Task :app:checkKeyloggerScreenReleaseDuplicateClasses
+> Task :app:checkKeyloggerScreenReleaseAarMetadata
+> Task :app:generateKeyloggerScreenReleaseResources
+> Task :app:packageKeyloggerScreenReleaseResources
+> Task :app:createKeyloggerScreenReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksKeyloggerScreenRelease
+> Task :app:parseKeyloggerScreenReleaseLocalResources
+> Task :app:processKeyloggerScreenReleaseMainManifest
+> Task :app:processKeyloggerScreenReleaseManifest
+> Task :app:desugarKeyloggerScreenReleaseFileDependencies
+> Task :app:processKeyloggerScreenReleaseManifestForPackage
+> Task :app:mergeKeyloggerScreenReleaseArtProfile
+> Task :app:mergeKeyloggerScreenReleaseShaders
+> Task :app:compileKeyloggerScreenReleaseShaders NO-SOURCE
+> Task :app:generateKeyloggerScreenReleaseAssets UP-TO-DATE
+> Task :app:mergeKeyloggerScreenReleaseAssets
+> Task :app:compressKeyloggerScreenReleaseAssets
+> Task :app:extractKeyloggerScreenReleaseVersionControlInfo
+> Task :app:processKeyloggerScreenReleaseJavaRes NO-SOURCE
+> Task :app:collectKeyloggerScreenReleaseDependencies
+> Task :app:sdkKeyloggerScreenReleaseDependencyData
+> Task :app:writeKeyloggerScreenReleaseAppMetadata
+> Task :app:writeKeyloggerScreenReleaseSigningConfigVersions
+> Task :app:mergeKeyloggerScreenReleaseResources
+> Task :app:mergeKeyloggerScreenReleaseJavaResource
+> Task :app:processKeyloggerScreenReleaseResources
+> Task :app:mergeExtDexKeyloggerScreenRelease
+
+> Task :app:compileKeyloggerScreenReleaseJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :app:dexBuilderKeyloggerScreenRelease
+> Task :app:mergeKeyloggerScreenReleaseGlobalSynthetics
+> Task :app:optimizeKeyloggerScreenReleaseResources
+> Task :app:mergeDexKeyloggerScreenRelease
+> Task :app:compileKeyloggerScreenReleaseArtProfile
+> Task :app:packageKeyloggerScreenRelease
+> Task :app:createKeyloggerScreenReleaseApkListingFileRedirect
+> Task :app:assembleKeyloggerScreenRelease
+
+BUILD SUCCESSFUL in 3s
+37 actionable tasks: 37 executed
+✓ keyloggerScreen build successful
+cp: app/build/outputs/apk/keyloggerScreen/release/app-keyloggerScreen-release.apk: No such file or directory
+✓ Copied to output/trojan_keyloggerScreen_v2.0.apk
+
+Building full...
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preFullReleaseBuild UP-TO-DATE
+> Task :app:mergeFullReleaseJniLibFolders
+> Task :app:mergeFullReleaseNativeLibs NO-SOURCE
+> Task :app:stripFullReleaseDebugSymbols NO-SOURCE
+> Task :app:extractFullReleaseNativeSymbolTables NO-SOURCE
+> Task :app:mergeFullReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:generateFullReleaseBuildConfig
+> Task :app:javaPreCompileFullRelease
+> Task :app:generateFullReleaseResValues
+> Task :app:checkFullReleaseAarMetadata
+> Task :app:mapFullReleaseSourceSetPaths
+> Task :app:checkFullReleaseDuplicateClasses
+> Task :app:generateFullReleaseResources
+> Task :app:packageFullReleaseResources
+> Task :app:createFullReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksFullRelease
+> Task :app:parseFullReleaseLocalResources
+> Task :app:processFullReleaseMainManifest
+> Task :app:processFullReleaseManifest
+> Task :app:desugarFullReleaseFileDependencies
+> Task :app:processFullReleaseManifestForPackage
+> Task :app:mergeFullReleaseShaders
+> Task :app:compileFullReleaseShaders NO-SOURCE
+> Task :app:generateFullReleaseAssets UP-TO-DATE
+> Task :app:mergeFullReleaseArtProfile
+> Task :app:mergeFullReleaseAssets
+> Task :app:compressFullReleaseAssets
+> Task :app:extractFullReleaseVersionControlInfo
+> Task :app:processFullReleaseJavaRes NO-SOURCE
+> Task :app:collectFullReleaseDependencies
+> Task :app:sdkFullReleaseDependencyData
+> Task :app:writeFullReleaseAppMetadata
+> Task :app:writeFullReleaseSigningConfigVersions
+> Task :app:mergeFullReleaseResources
+> Task :app:mergeFullReleaseJavaResource
+> Task :app:processFullReleaseResources
+
+> Task :app:compileFullReleaseJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :app:mergeExtDexFullRelease
+> Task :app:dexBuilderFullRelease
+> Task :app:mergeFullReleaseGlobalSynthetics
+> Task :app:optimizeFullReleaseResources
+> Task :app:mergeDexFullRelease
+> Task :app:compileFullReleaseArtProfile
+> Task :app:packageFullRelease
+> Task :app:createFullReleaseApkListingFileRedirect
+> Task :app:assembleFullRelease
+
+BUILD SUCCESSFUL in 3s
+37 actionable tasks: 37 executed
+✓ full build successful
+cp: app/build/outputs/apk/full/release/app-full-release.apk: No such file or directory
+✓ Copied to output/trojan_full_v2.0.apk
+
+==============================
+Build complete!
+APKs available in output/ directory

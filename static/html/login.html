@@ -1,45 +1,375 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>RedTeamOps - Login</title>
 
-    <!-- FONTS -->
-    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Material+Icons&display=swap"
+        rel="stylesheet">
 
+    <style>
+        :root {
+            --bg-primary: #0A0E27;
+            --bg-secondary: #141B2D;
+            --bg-tertiary: #1A2332;
+            --brand-primary: #9FEF00;
+            --brand-secondary: #7BC700;
+            --text-primary: #E2E8F0;
+            --text-secondary: #94A3B8;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --success: #10B981;
+            --error: #EF4444;
+        }
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="../css/login.css">
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <!-- JS -->
-    <script src="../js/jquery.js" defer></script>
-    <script src="../js/login.js" defer></script>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(rgba(159, 239, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(159, 239, 0, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes gridMove {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(50px, 50px);
+            }
+        }
+
+        /* Glowing orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            pointer-events: none;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--brand-primary);
+            top: -200px;
+            left: -200px;
+        }
+
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--brand-secondary);
+            bottom: -150px;
+            right: -150px;
+        }
+
+        /* Login container */
+        .login-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
+            padding: 2rem;
+        }
+
+        .login-card {
+            background: rgba(20, 27, 45, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Logo and header */
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo-container {
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo-container img {
+            width: 80px;
+            height: 80px;
+            filter: drop-shadow(0 0 20px rgba(159, 239, 0, 0.3));
+        }
+
+        .login-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+        }
+
+        .login-title .highlight {
+            color: var(--brand-primary);
+        }
+
+        .login-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Form */
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 20px;
+            pointer-events: none;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 3rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.9375rem;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--brand-primary);
+            box-shadow: 0 0 0 3px rgba(159, 239, 0, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        /* Login button */
+        .login-button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
+            border: none;
+            border-radius: 8px;
+            color: var(--bg-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 0.5rem;
+            box-shadow: 0 4px 12px rgba(159, 239, 0, 0.2);
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(159, 239, 0, 0.3);
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        /* Error message */
+        .error-message {
+            display: none;
+            padding: 0.875rem 1rem;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            color: var(--error);
+            font-size: 0.875rem;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .error-message.show {
+            display: flex;
+        }
+
+        .error-message .material-icons {
+            font-size: 18px;
+        }
+
+        /* Footer */
+        .login-footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* Loading state */
+        .login-button.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .login-button.loading::after {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-left: 8px;
+            border: 2px solid var(--bg-primary);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <div id="container">
-        <form action="#" method="post">
-            <div id="heading">
-                <img src="../img/hacking.png" alt="">
-                <p>Mal World</p>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo-container">
+                    <img src="../img/trojan-logo.svg" alt="RedTeamOps Logo">
+                </div>
+                <h1 class="login-title">RedTeam<span class="highlight">Ops</span></h1>
+                <p class="login-subtitle">Command & Control Operations Center</p>
             </div>
-            <div id="content">
-                <div class="field">
-                    <img src="../img/user.png" alt="">
-                    <input id="username" type="text" name="username" placeholder="Username" autocomplete="off" required/>
+
+            <form class="login-form" id="loginForm">
+                <div class="error-message" id="errorMessage">
+                    <i class="material-icons">error</i>
+                    <span>Invalid username or password</span>
                 </div>
-                <div class="field">
-                    <img src="../img/key.png" alt="">
-                    <input id="password" type="password" name="password" placeholder="Password" autocomplete="off" required/>
+
+                <div class="form-group">
+                    <label class="form-label" for="username">Username</label>
+                    <div class="input-wrapper">
+                        <i class="material-icons input-icon">person</i>
+                        <input type="text" id="username" name="username" class="form-input"
+                            placeholder="Enter your username" required autocomplete="username">
+                    </div>
                 </div>
-                <button type="submit" onclick="login()" id="bnt1">
-                    <p>Log In</p>
-                    <span class="loader"></span>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <div class="input-wrapper">
+                        <i class="material-icons input-icon">lock</i>
+                        <input type="password" id="password" name="password" class="form-input"
+                            placeholder="Enter your password" required autocomplete="current-password">
+                    </div>
+                </div>
+
+                <button type="submit" class="login-button" id="loginButton">
+                    Sign In
                 </button>
+            </form>
+
+            <div class="login-footer">
+                <p>Secure Access • Encrypted Connection</p>
             </div>
-        </form>
+        </div>
     </div>
+
+    <script src="../js/jquery.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#loginForm').on('submit', function (e) {
+                e.preventDefault();
+
+                const username = $('#username').val();
+                const password = $('#password').val();
+                const button = $('#loginButton');
+                const errorMsg = $('#errorMessage');
+
+                // Hide error message
+                errorMsg.removeClass('show');
+
+                // Show loading state
+                button.addClass('loading').text('Signing in');
+
+                $.post('/login', { username, password }, function (response) {
+                    if (response === 'ok') {
+                        button.text('Success!');
+                        window.location.href = '/dashboard';
+                    } else {
+                        button.removeClass('loading').text('Sign In');
+                        errorMsg.addClass('show');
+                    }
+                }).fail(function () {
+                    button.removeClass('loading').text('Sign In');
+                    errorMsg.addClass('show');
+                });
+            });
+
+            // Clear error on input
+            $('#username, #password').on('input', function () {
+                $('#errorMessage').removeClass('show');
+            });
+        });
+    </script>
 </body>
+
 </html>

