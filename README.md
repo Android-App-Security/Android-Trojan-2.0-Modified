@@ -17,7 +17,7 @@
 
 ## 🎯 Overview
 
-Android Trojan 2.0 is a sophisticated Command & Control (C2) framework designed for security research and penetration testing. It features a modern web-based dashboard with real-time device monitoring, customizable APK generation, and multi-device management capabilities.
+Android Trojan 2.0 - Modified is a sophisticated Command & Control (C2) framework designed for security research and penetration testing. It features a modern web-based dashboard with real-time device monitoring, customizable APK generation, and multi-device management capabilities.
 
 ---
 
