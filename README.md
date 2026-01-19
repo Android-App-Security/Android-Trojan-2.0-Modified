@@ -173,12 +173,6 @@ The server will start on:
 
 ## 🎨 Screenshots
 
-### 🔐 Login Page
-Modern authentication interface with Hack The Box aesthetic, featuring the new geometric logo and animated background.
-
-![Login Page](screenshots/login_page.png)
-
----
 
 ### 📊 Dashboard Overview
 Multi-device management dashboard with HTB theme, real-time device monitoring, and comprehensive control panels.
@@ -187,24 +181,11 @@ Multi-device management dashboard with HTB theme, real-time device monitoring, a
 
 ---
 
-### 🔧 APK Generator
-One-click APK generation with preset build profiles - choose between Stealth Mode, Remote Control, or Full Access.
-
-![APK Generator](screenshots/apk_generator.png)
-
----
 
 ### 📱 Screen Share Popup
 Interactive popup modal for screen monitoring - background remains accessible while viewing live screen feed.
 
 ![Screen Share Modal](screenshots/screen_share_popup.png)
-
----
-
-### 🎛️ Device Monitoring
-Comprehensive monitoring panels featuring keylogger, screen feed, SMS access, and shell terminal in a clean multi-view layout.
-
-![Device Monitoring](screenshots/device_monitoring.png)
 
 ---
 
