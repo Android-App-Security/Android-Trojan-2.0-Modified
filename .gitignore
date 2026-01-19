@@ -6,3 +6,4 @@ sessions/.env
 .env
 output/
 *.apk
+sessions/

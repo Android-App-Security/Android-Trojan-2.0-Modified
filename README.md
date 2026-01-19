@@ -238,20 +238,6 @@ Or transfer the APK to the device and install manually.
 
 ---
 
-## 📱 APK Variants
-
-| Variant | Features | Size | Permissions |
-|---------|----------|------|-------------|
-| `trojan_sms_v2.0.apk` | SMS + Shell | 5.0MB | READ_SMS, RECEIVE_SMS |
-| `trojan_keylogger_v2.0.apk` | Keylogger + Shell | 5.0MB | BIND_ACCESSIBILITY_SERVICE |
-| `trojan_screen_v2.0.apk` | Screen + Shell | 5.0MB | RECORD_AUDIO |
-| `trojan_sms_keylogger_v2.0.apk` | SMS + Keylogger + Shell | 5.0MB | READ_SMS, BIND_ACCESSIBILITY |
-| `trojan_sms_screen_v2.0.apk` | SMS + Screen + Shell | 5.0MB | READ_SMS, RECORD_AUDIO |
-| `trojan_keylogger_screen_v2.0.apk` | Keylogger + Screen + Shell | 5.0MB | BIND_ACCESSIBILITY, RECORD_AUDIO |
-| `trojan_full_v2.0.apk` | All Features | 5.0MB | All Permissions |
-
----
-
 ## 🎨 Screenshots
 
 ### Login Page
