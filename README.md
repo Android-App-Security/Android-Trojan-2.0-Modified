@@ -19,55 +19,6 @@
 
 Android Trojan 2.0 is a sophisticated Command & Control (C2) framework designed for security research and penetration testing. It features a modern web-based dashboard with real-time device monitoring, customizable APK generation, and multi-device management capabilities.
 
-### ✨ What's New in v2.0
-
-- 🎨 **Hack The Box Theme** - Professional cybersecurity aesthetic
-- 📱 **Customizable APK Generation** - Feature-selective builds with minimal permissions
-- 🔐 **Conditional Permissions** - Only request permissions for enabled features
-- 🚀 **Simplified UI** - One-click APK generation with preset profiles
-- 🔒 **Secure Authentication** - Session management with logout functionality
-- 🎭 **New Logo** - Geometric cube design with neon green accents
-
----
-
-## 🚀 Features
-
-### Dashboard Features
-
-- **Multi-Device Management** - Monitor and control multiple Android devices simultaneously
-- **Real-Time Screen Sharing** - Live screen capture with remote mouse control
-- **Keylogger** - Capture keyboard input and accessibility events
-- **SMS Access** - Read and dump SMS messages
-- **Shell Access** - Execute remote commands on target devices
-- **Modern UI** - Dark theme with animated backgrounds and glassmorphism
-
-### APK Generation
-
-Generate custom trojans with **three preset profiles**:
-
-#### 🔒 Stealth Mode
-- **Features:** SMS Read only
-- **Permissions:** READ_SMS, RECEIVE_SMS
-- **Use Case:** Minimal footprint for covert operations
-
-#### 📱 Remote Control
-- **Features:** Screen Share + Keylogger
-- **Permissions:** RECORD_AUDIO, BIND_ACCESSIBILITY_SERVICE
-- **Use Case:** Full device control and monitoring
-
-#### 🌐 Full Access
-- **Features:** All features enabled
-- **Permissions:** All permissions
-- **Use Case:** Complete device access
-
-### Technical Features
-
-- **Socket.IO** - Real-time bidirectional communication
-- **Product Flavors** - 7 different APK variants
-- **Conditional Manifests** - Feature-specific permission requests
-- **Foreground Service** - Reliable socket connection
-- **Debug Signing** - Pre-signed APKs ready for installation
-
 ---
 
 ## 📋 Requirements
@@ -218,24 +169,6 @@ The server will start on:
 2. Login with your credentials (configured in Supabase)
 3. Access the dashboard at `http://localhost:4001/dashboard`
 
-### Generate Custom APK
-
-1. Click **"Generate APK"** button in the dashboard
-2. Enter server IP (or leave empty for auto-detection)
-3. Select a build profile:
-   - **Stealth Mode** - SMS only
-   - **Remote Control** - Screen + Keylogger
-   - **Full Access** - All features
-4. APK will be generated and downloaded automatically
-
-### Install on Target Device
-
-```bash
-adb install output/trojan_[profile]_v2.0.apk
-```
-
-Or transfer the APK to the device and install manually.
-
 ---
 
 ## 🎨 Screenshots
@@ -275,98 +208,7 @@ Comprehensive monitoring panels featuring keylogger, screen feed, SMS access, an
 
 ---
 
-## 🏗️ Architecture
 
-### Backend (Node.js + Express)
-- **Socket.IO** - Real-time communication
-- **Express** - Web server and API
-- **Session Management** - Secure authentication
-- **APK Generation** - Serve pre-built variants
-
-### Frontend (Vanilla JS)
-- **Modern UI** - HTB-inspired design
-- **Real-time Updates** - Socket.IO client
-- **Responsive Design** - Works on all screen sizes
-- **Material Icons** - Professional iconography
-
-### Android App (Java)
-- **MyService** - Foreground service with socket connection
-- **Keylogger** - Accessibility service for input capture
-- **Capture** - Screen recording and streaming
-- **ShellExec** - Remote command execution
-- **Product Flavors** - Feature-selective builds
-
----
-
-## 🔧 Development
-
-### Project Structure
-
-```
-Android-Trojan-2.0/
-├── mobile/                 # Android app source
-│   ├── app/
-│   │   ├── src/
-│   │   │   ├── main/      # Main source code
-│   │   │   ├── sms/       # SMS variant manifest
-│   │   │   ├── keylogger/ # Keylogger variant manifest
-│   │   │   └── screen/    # Screen variant manifest
-│   │   └── build.gradle   # Product flavors configuration
-├── static/                # Web dashboard
-│   ├── html/             # HTML pages
-│   ├── css/              # Stylesheets
-│   ├── js/               # JavaScript
-│   └── img/              # Images and logo
-├── output/               # Pre-built APKs
-├── server.js             # Main server
-├── build-all-apks.sh     # Build script
-└── sign-apks.sh          # Signing script
-```
-
-### Build Profiles
-
-The app uses Gradle product flavors to create feature-specific variants:
-
-```gradle
-productFlavors {
-    sms {
-        buildConfigField "boolean", "FEATURE_SMS", "true"
-        buildConfigField "boolean", "FEATURE_KEYLOGGER", "false"
-        buildConfigField "boolean", "FEATURE_SCREEN", "false"
-        versionNameSuffix "-sms"
-    }
-    // ... other flavors
-}
-```
-
-### Conditional Permissions
-
-Flavor-specific manifests use `tools:node="remove"` to exclude unnecessary permissions:
-
-```xml
-<!-- sms/AndroidManifest.xml -->
-<service
-    android:name=".Keylogger"
-    tools:node="remove" />
-```
-
----
-
-## 🔒 Security Considerations
-
-### For Researchers
-- Always obtain proper authorization before testing
-- Use only in controlled environments
-- Follow responsible disclosure practices
-- Comply with local laws and regulations
-
-### For Defenders
-- Monitor for suspicious accessibility service requests
-- Check for foreground services with network access
-- Review app permissions carefully
-- Use mobile security solutions
-
----
 
 ## 🐛 Troubleshooting
 
@@ -388,25 +230,7 @@ Flavor-specific manifests use `tools:node="remove"` to exclude unnecessary permi
 
 ---
 
-## 📚 Documentation
 
-- [Implementation Plan](/.gemini/antigravity/brain/23524d77-919d-43ce-b5ab-f49673bf4c27/implementation_plan.md)
-- [Walkthrough](/.gemini/antigravity/brain/23524d77-919d-43ce-b5ab-f49673bf4c27/walkthrough.md)
-- [Task Checklist](/.gemini/antigravity/brain/23524d77-919d-43ce-b5ab-f49673bf4c27/task.md)
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
----
 
 ## 📄 License
 
@@ -425,20 +249,7 @@ By using this software, you agree to use it responsibly and in compliance with a
 
 ---
 
-## 👨‍💻 Author
 
-**Ko-kn3t**
-- GitHub: [@Ko-kn3t](https://github.com/Ko-kn3t)
-
----
-
-## 🙏 Acknowledgments
-
-- Inspired by Hack The Box's cybersecurity aesthetic
-- Built with Socket.IO for real-time communication
-- Uses Material Icons for UI elements
-
----
 
 <div align="center">
 
