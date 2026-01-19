@@ -176,35 +176,35 @@ The server will start on:
 ### 🔐 Login Page
 Modern authentication interface with Hack The Box aesthetic, featuring the new geometric logo and animated background.
 
-![Login Page](/Users/koko.nai/.gemini/antigravity/brain/23524d77-919d-43ce-b5ab-f49673bf4c27/login_page_1768809808976.png)
+![Login Page](screenshots/login_page.png)
 
 ---
 
 ### 📊 Dashboard Overview
 Multi-device management dashboard with HTB theme, real-time device monitoring, and comprehensive control panels.
 
-![Dashboard](/Users/koko.nai/.gemini/antigravity/brain/23524d77-919d-43ce-b5ab-f49673bf4c27/dashboard_full_view_1768809058243.png)
+![Dashboard](screenshots/dashboard_overview.png)
 
 ---
 
 ### 🔧 APK Generator
 One-click APK generation with preset build profiles - choose between Stealth Mode, Remote Control, or Full Access.
 
-![APK Generator](/Users/koko.nai/.gemini/antigravity/brain/23524d77-919d-43ce-b5ab-f49673bf4c27/apk_generator_panel_1768809098364.png)
+![APK Generator](screenshots/apk_generator.png)
 
 ---
 
 ### 📱 Screen Share Popup
 Interactive popup modal for screen monitoring - background remains accessible while viewing live screen feed.
 
-![Screen Share Modal](/Users/koko.nai/.gemini/antigravity/brain/23524d77-919d-43ce-b5ab-f49673bf4c27/screen_share_popup_modal_1768809716246.png)
+![Screen Share Modal](screenshots/screen_share_popup.png)
 
 ---
 
 ### 🎛️ Device Monitoring
 Comprehensive monitoring panels featuring keylogger, screen feed, SMS access, and shell terminal in a clean multi-view layout.
 
-![Device Monitoring](/Users/koko.nai/.gemini/antigravity/brain/23524d77-919d-43ce-b5ab-f49673bf4c27/device_monitoring_panels_1768809758192.png)
+![Device Monitoring](screenshots/device_monitoring.png)
 
 ---
 
