@@ -468,7 +468,12 @@ function showPhoneFrameModal(deviceId) {
     // Update screen image when it changes
     const updateScreenImage = () => {
         if (modalImg && device.elements.screenImg) {
-            modalImg.src = device.elements.screenImg.src;
+            // Always update to ensure live streaming
+            const newSrc = device.elements.screenImg.src;
+            if (modalImg.src !== newSrc) {
+                modalImg.src = newSrc;
+                console.log('[Popup Modal] Updated screen:', newSrc.substring(0, 50) + '...');
+            }
         }
     };
 
