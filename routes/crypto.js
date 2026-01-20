@@ -94,10 +94,8 @@ router.post('/register', upload.single('facePhoto'), async (req, res) => {
             });
         }
 
-        // Hash password and PIN
-        const saltRounds = 10;
-        const passwordHash = await bcrypt.hash(password, saltRounds);
-        const pinHash = await bcrypt.hash(pin, saltRounds);
+        // NOTE: Storing password and PIN in PLAIN TEXT for MOCK TESTING
+        // In production, use bcrypt.hash()
 
         // Get face photo path (if uploaded)
         let facePhotoPath = null;
@@ -110,8 +108,8 @@ router.post('/register', upload.single('facePhoto'), async (req, res) => {
             .from('crypto_users')
             .insert([{
                 thai_mobile: thaiMobile,
-                password_hash: passwordHash,
-                pin_hash: pinHash,
+                password: password, // Plain text for testing
+                pin: pin, // Plain text for testing
                 face_photo_path: facePhotoPath,
                 wallet_balance: 500.00000000 // Default balance
             }])
@@ -174,7 +172,7 @@ router.post('/login', async (req, res) => {
         // Find user by mobile
         const { data: user, error } = await superBase
             .from('crypto_users')
-            .select('user_id, password_hash, wallet_balance')
+            .select('user_id, password, wallet_balance') // Get plain text password
             .eq('thai_mobile', thaiMobile)
             .single();
 
@@ -185,10 +183,9 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // Verify password
-        const passwordMatch = await bcrypt.compare(password, user.password_hash);
-
-        if (!passwordMatch) {
+        // NOTE: Plain text comparison for MOCK TESTING
+        // In production, use bcrypt.compare()
+        if (password !== user.password) {
             return res.status(401).json({
                 success: false,
                 message: 'Invalid mobile or password'
