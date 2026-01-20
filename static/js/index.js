@@ -457,9 +457,16 @@ function showPhoneFrameModal(deviceId) {
 
     document.body.appendChild(modal);
 
+    // Get the modal image element
+    const modalImg = modal.querySelector('.popup-screen-img');
+
+    // Setup mouse control for the modal image
+    if (modalImg) {
+        setupScreenInteraction(deviceId, modalImg);
+    }
+
     // Update screen image when it changes
     const updateScreenImage = () => {
-        const modalImg = modal.querySelector('.popup-screen-img');
         if (modalImg && device.elements.screenImg) {
             modalImg.src = device.elements.screenImg.src;
         }
