@@ -487,8 +487,9 @@ function showPhoneFrameModal(deviceId) {
 function closePhoneFrameModal() {
     const modal = document.querySelector('.screen-popup-modal');
     if (modal) {
-        if (modal._observer) {
-            modal._observer.disconnect();
+        // Cancel animation frame
+        if (modal._animationId) {
+            cancelAnimationFrame(modal._animationId);
         }
         modal.remove();
     }
