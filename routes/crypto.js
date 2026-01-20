@@ -1,20 +1,16 @@
-const express = require('express');
-const router = express.Router();
-const bcrypt = require('bcrypt');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const { createClient } = require('@supabase/supabase-js');
+import express from 'express';
+import bcrypt from 'bcrypt';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { superBase } from '../modules/superBaseAPI.js';
 
-// Initialize Supabase client
-const supabaseUrl = process.env.SUPERBASE_URL;
-const supabaseKey = process.env.SUPERBASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const router = express.Router();
 
 // Configure multer for face photo uploads
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const uploadDir = path.join(__dirname, '../uploads/faces');
+        const uploadDir = path.join(process.cwd(), 'uploads', 'faces');
         if (!fs.existsSync(uploadDir)) {
             fs.mkdirSync(uploadDir, { recursive: true });
         }
@@ -85,7 +81,7 @@ router.post('/register', upload.single('facePhoto'), async (req, res) => {
         }
 
         // Check if mobile already exists
-        const { data: existingUser } = await supabase
+        const { data: existingUser } = await superBase
             .from('crypto_users')
             .select('user_id')
             .eq('thai_mobile', thaiMobile)
@@ -110,7 +106,7 @@ router.post('/register', upload.single('facePhoto'), async (req, res) => {
         }
 
         // Insert new user into database
-        const { data: newUser, error } = await supabase
+        const { data: newUser, error } = await superBase
             .from('crypto_users')
             .insert([{
                 thai_mobile: thaiMobile,
@@ -131,7 +127,7 @@ router.post('/register', upload.single('facePhoto'), async (req, res) => {
         }
 
         // Create initial transaction record
-        await supabase
+        await superBase
             .from('crypto_transactions')
             .insert([{
                 user_id: newUser.user_id,
@@ -176,7 +172,7 @@ router.post('/login', async (req, res) => {
         }
 
         // Find user by mobile
-        const { data: user, error } = await supabase
+        const { data: user, error } = await superBase
             .from('crypto_users')
             .select('user_id, password_hash, wallet_balance')
             .eq('thai_mobile', thaiMobile)
@@ -225,7 +221,7 @@ router.get('/balance/:userId', async (req, res) => {
         const { userId } = req.params;
 
         // Fetch user balance
-        const { data: user, error } = await supabase
+        const { data: user, error } = await superBase
             .from('crypto_users')
             .select('wallet_balance, updated_at')
             .eq('user_id', userId)
@@ -263,7 +259,7 @@ router.get('/user/:userId', async (req, res) => {
         const { userId } = req.params;
 
         // Fetch user data (excluding sensitive info)
-        const { data: user, error } = await supabase
+        const { data: user, error } = await superBase
             .from('crypto_users')
             .select('user_id, thai_mobile, wallet_balance, face_photo_path, created_at')
             .eq('user_id', userId)
@@ -296,4 +292,4 @@ router.get('/user/:userId', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

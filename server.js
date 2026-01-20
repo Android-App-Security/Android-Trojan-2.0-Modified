@@ -10,6 +10,7 @@ import session from "express-session";
 import FileStore from "session-file-store";
 import crypto from "node:crypto";
 import webRoute from "./routes/webRoutes.js";
+import cryptoRoutes from "./routes/crypto.js";
 
 
 // Clearing the database
