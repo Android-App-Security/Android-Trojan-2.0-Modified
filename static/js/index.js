@@ -465,28 +465,22 @@ function showPhoneFrameModal(deviceId) {
         setupScreenInteraction(deviceId, modalImg);
     }
 
-    // Update screen image when it changes
+    // Update screen image continuously
     const updateScreenImage = () => {
         if (modalImg && device.elements.screenImg) {
-            // Always update to ensure live streaming
             const newSrc = device.elements.screenImg.src;
             if (modalImg.src !== newSrc) {
                 modalImg.src = newSrc;
-                console.log('[Popup Modal] Updated screen:', newSrc.substring(0, 50) + '...');
+                console.log('[Popup Modal] Updated screen');
             }
         }
     };
 
-    // Start continuous sync using requestAnimationFrame
-    let animationId;
-    const syncScreenFeed = () => {
-        updateScreenImage();
-        animationId = requestAnimationFrame(syncScreenFeed);
-    };
-    animationId = requestAnimationFrame(syncScreenFeed);
+    // Use setInterval for reliable continuous updates (10 fps)
+    const intervalId = setInterval(updateScreenImage, 100);
 
-    // Store animation ID for cleanup
-    modal._animationId = animationId;
+    // Store interval ID for cleanup
+    modal._intervalId = intervalId;
     modal._deviceId = deviceId;
 }
 
@@ -494,9 +488,9 @@ function showPhoneFrameModal(deviceId) {
 function closePhoneFrameModal() {
     const modal = document.querySelector('.screen-popup-modal');
     if (modal) {
-        // Cancel animation frame
-        if (modal._animationId) {
-            cancelAnimationFrame(modal._animationId);
+        // Clear interval
+        if (modal._intervalId) {
+            clearInterval(modal._intervalId);
         }
         modal.remove();
     }
