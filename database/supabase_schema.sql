@@ -7,12 +7,13 @@
 -- ============================================
 -- Table: crypto_users
 -- Stores user registration and authentication data
+-- NOTE: Using PLAIN TEXT passwords/PINs for MOCK TESTING only
 -- ============================================
 CREATE TABLE IF NOT EXISTS public.crypto_users (
   user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   thai_mobile VARCHAR(10) UNIQUE NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,
-  pin_hash VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NOT NULL, -- Plain text for testing
+  pin VARCHAR(6) NOT NULL, -- Plain text for testing
   face_photo_path VARCHAR(255),
   wallet_balance DECIMAL(18,8) DEFAULT 500.00000000,
   created_at TIMESTAMP DEFAULT NOW(),
@@ -112,11 +113,11 @@ CREATE POLICY "Service can insert transactions"
 -- Uncomment to add test user
 /*
 INSERT INTO public.crypto_users 
-  (thai_mobile, password_hash, pin_hash, wallet_balance) 
+  (thai_mobile, password, pin, wallet_balance) 
 VALUES 
   ('0812345678', 
-   '$2b$10$XyZ123...', -- Replace with actual bcrypt hash of 'password123'
-   '$2b$10$AbC456...', -- Replace with actual bcrypt hash of '123456'
+   'password123', -- Plain text for testing
+   '123456', -- Plain text for testing
    500.00000000);
 */
 
