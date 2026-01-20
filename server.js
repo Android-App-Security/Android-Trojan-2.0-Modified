@@ -113,6 +113,12 @@ app.post('/logout', (req, res) => {
     });
 });
 
+// Serve uploaded face photos (before auth)
+app.use('/uploads', express.static('uploads'))
+
+// Mount crypto API routes (before auth middleware)
+app.use('/api/crypto', cryptoRoutes)
+
 app.use('/', webRoute)
 app.post("/login", async (req, res) => {
     var username = req.body.username
