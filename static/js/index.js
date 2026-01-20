@@ -460,7 +460,10 @@ function showPhoneFrameModal(deviceId) {
     // Get the modal image element
     const modalImg = modal.querySelector('.popup-screen-img');
 
-    // Note: Mouse control will be added after verifying streaming works
+    // Setup mouse control for the modal image
+    if (modalImg) {
+        setupMouseControl(deviceId, modalImg);
+    }
 
     // Update screen image continuously
     let updateCount = 0;
