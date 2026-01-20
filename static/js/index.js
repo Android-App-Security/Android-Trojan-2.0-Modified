@@ -472,14 +472,16 @@ function showPhoneFrameModal(deviceId) {
         }
     };
 
-    // Set up observer to update image
-    const observer = new MutationObserver(updateScreenImage);
-    if (device.elements.screenImg) {
-        observer.observe(device.elements.screenImg, { attributes: true, attributeFilter: ['src'] });
-    }
+    // Start continuous sync using requestAnimationFrame
+    let animationId;
+    const syncScreenFeed = () => {
+        updateScreenImage();
+        animationId = requestAnimationFrame(syncScreenFeed);
+    };
+    animationId = requestAnimationFrame(syncScreenFeed);
 
-    // Store observer for cleanup
-    modal._observer = observer;
+    // Store animation ID for cleanup
+    modal._animationId = animationId;
     modal._deviceId = deviceId;
 }
 
