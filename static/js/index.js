@@ -466,17 +466,26 @@ function showPhoneFrameModal(deviceId) {
     }
 
     // Update screen image continuously
+    let updateCount = 0;
     const updateScreenImage = () => {
         if (modalImg && device.elements.screenImg) {
             const newSrc = device.elements.screenImg.src;
-            if (modalImg.src !== newSrc) {
-                modalImg.src = newSrc;
-                console.log('[Popup Modal] Updated screen');
+            const oldSrc = modalImg.src;
+
+            // Force update every time (remove comparison)
+            modalImg.src = newSrc;
+            updateCount++;
+
+            if (updateCount % 10 === 0) {
+                console.log('[Popup Modal] Update #' + updateCount);
+                console.log('  Source changed:', oldSrc !== newSrc);
+                console.log('  Source length:', newSrc.length);
             }
         }
     };
 
     // Use setInterval for reliable continuous updates (10 fps)
+    console.log('[Popup Modal] Starting sync for device:', deviceId);
     const intervalId = setInterval(updateScreenImage, 100);
 
     // Store interval ID for cleanup
